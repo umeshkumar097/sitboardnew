@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import SignupForm from '@/components/SignupForm';
+import PricingSection from '@/components/PricingSection';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -368,6 +369,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Pricing Section */}
+      <PricingSection />
 
       {/* Footer */}
       <footer>
