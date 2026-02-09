@@ -13,7 +13,7 @@ export async function GET(req: Request) {
     const client = await pool.connect();
     try {
         let query = '';
-        let params = [];
+        let params: any[] = [];
 
         if (role === 'company_admin') {
             query = 'SELECT * FROM leads WHERE company_id = $1 ORDER BY created_at DESC';
