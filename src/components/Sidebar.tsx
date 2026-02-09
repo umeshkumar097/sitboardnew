@@ -38,6 +38,7 @@ export default function Sidebar({ user, isOpen, setIsOpen }: { user: any, isOpen
         navItems.push({ name: 'Companies', href: '/dashboard/companies', icon: Icons.Briefcase });
         navItems.push({ name: 'Plans', href: '/dashboard/admin/plans', icon: Icons.Plans });
         navItems.push({ name: 'Users', href: '/dashboard/users', icon: Icons.Users });
+        navItems.push({ name: 'Enquiries', href: '/dashboard/admin/enquiries', icon: Icons.Users }); // Using Users icon for now or similar
     } else {
         // Companies and Agents see Projects. Super Admins might not need direct project access or different view?
         // Usually Super Admins manage Companies, Company Admins manage Projects.

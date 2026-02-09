@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import RequestQuoteModal from './RequestQuoteModal';
 
 const tiers = [
     {
@@ -16,35 +17,38 @@ const tiers = [
         ],
         cta: 'Start Free Trial',
         primary: false,
-        action: '/signup' // Standard signup flow starts trial
+        action: '/signup',
+        isRequest: false
     },
     {
         name: 'Starter',
-        price: '$49', // Placeholder
-        duration: '/month',
+        price: 'Contact Us',
+        duration: '',
         features: [
             'Up to 10 Users',
             'Advanced Analytics',
             'Email Support',
             'Custom Domain'
         ],
-        cta: 'Buy Now',
+        cta: 'Request Quote',
         primary: true,
-        action: '#' // Placeholder for payment link
+        action: '#',
+        isRequest: true
     },
     {
         name: 'Business',
-        price: '$99', // Placeholder
-        duration: '/month',
+        price: 'Contact Us',
+        duration: '',
         features: [
             'Unlimited Users',
             'Priority Support',
             'White Labeling',
             'API Access'
         ],
-        cta: 'Buy Now',
+        cta: 'Request Quote',
         primary: false,
-        action: '#' // Placeholder
+        action: '#',
+        isRequest: true
     },
     {
         name: 'Enterprise',
@@ -58,15 +62,35 @@ const tiers = [
         ],
         cta: 'Contact Sales',
         primary: false,
-        action: 'mailto:sales@siteboard.com'
+        action: '#',
+        isRequest: true
     }
 ];
 
 export default function PricingSection() {
     const router = useRouter();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedPlan, setSelectedPlan] = useState('');
+
+    const handleAction = (tier: any) => {
+        if (tier.isRequest) {
+            setSelectedPlan(tier.name);
+            setIsModalOpen(true);
+        } else if (tier.action.startsWith('http') || tier.action.startsWith('mailto')) {
+            window.location.href = tier.action;
+        } else {
+            router.push(tier.action);
+        }
+    };
 
     return (
         <section className="py-24 bg-slate-50 relative overflow-hidden" id="pricing">
+            <RequestQuoteModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                planName={selectedPlan}
+            />
+
             {/* Background decorative elements */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                 <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
@@ -88,14 +112,14 @@ export default function PricingSection() {
                         <div
                             key={tier.name}
                             className={`p-8 rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col ${tier.primary
-                                    ? 'bg-slate-900 text-white border-slate-900 shadow-lg scale-105 z-10'
-                                    : 'bg-white text-slate-900 border-slate-200'
+                                ? 'bg-slate-900 text-white border-slate-900 shadow-lg scale-105 z-10'
+                                : 'bg-white text-slate-900 border-slate-200'
                                 }`}
                         >
                             <div className="mb-6">
                                 <h3 className={`text-lg font-semibold mb-2 ${tier.primary ? 'text-blue-300' : 'text-slate-900'}`}>{tier.name}</h3>
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-4xl font-bold">{tier.price}</span>
+                                    <span className="text-3xl font-bold">{tier.price}</span>
                                     {tier.duration && <span className={`text-sm ${tier.primary ? 'text-slate-400' : 'text-slate-500'}`}>{tier.duration}</span>}
                                 </div>
                             </div>
@@ -117,10 +141,10 @@ export default function PricingSection() {
                             </ul>
 
                             <button
-                                onClick={() => tier.action.startsWith('http') || tier.action.startsWith('mailto') ? window.location.href = tier.action : router.push(tier.action)}
+                                onClick={() => handleAction(tier)}
                                 className={`w-full py-3 rounded-xl font-semibold transition-colors ${tier.primary
-                                        ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20'
-                                        : 'bg-slate-100 hover:bg-slate-200 text-slate-900'
+                                    ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20'
+                                    : 'bg-slate-100 hover:bg-slate-200 text-slate-900'
                                     }`}
                             >
                                 {tier.cta}
@@ -131,7 +155,7 @@ export default function PricingSection() {
 
                 <div className="mt-16 text-center">
                     <p className="text-slate-500">
-                        Need a custom solution for multiple branches? <a href="mailto:sales@siteboard.com" className="text-blue-600 font-semibold hover:underline">Contact our sales team</a>
+                        Need a custom solution for multiple branches? <button onClick={() => { setSelectedPlan('Custom Solution'); setIsModalOpen(true); }} className="text-blue-600 font-semibold hover:underline">Contact our sales team</button>
                     </p>
                 </div>
             </div>
