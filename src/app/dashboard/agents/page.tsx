@@ -25,9 +25,9 @@ export default async function AgentsPage() {
 
     return (
         <div>
-            <div className="mb-8">
-                <h1 className="text-2xl font-bold text-slate-900">Agent Management</h1>
-                <p className="text-slate-500 text-sm">Create and manage your sales agents</p>
+            <div className="mb-6">
+                <h1 className="text-sm font-semibold text-slate-800 tracking-tight">Agent Management</h1>
+                <p className="text-gray-400 text-[10px] mt-0.5">Create and manage your sales agents</p>
             </div>
 
             {/* 

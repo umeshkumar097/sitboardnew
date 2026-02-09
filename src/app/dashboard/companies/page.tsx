@@ -27,12 +27,12 @@ export default async function CompaniesPage() {
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Company Management</h1>
-                    <p className="text-slate-500 text-sm">Create and activate real estate companies</p>
+                    <h1 className="text-sm font-semibold text-slate-800 tracking-tight">Company Management</h1>
+                    <p className="text-gray-400 text-[10px] mt-0.5">Create and activate real estate companies</p>
                 </div>
-                <Link href="/dashboard/companies/new" className="bg-slate-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-black transition-colors shadow-lg">
+                <Link href="/dashboard/companies/new" className="bg-slate-900 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-black transition-colors shadow-sm">
                     + New Company
                 </Link>
             </div>

@@ -1,8 +1,8 @@
 export default function SettingsPage() {
     return (
         <div className="max-w-4xl mx-auto">
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">Settings</h1>
-            <p className="text-gray-500 mb-8">Manage your account and preferences.</p>
+            <h1 className="text-sm font-semibold text-slate-800 mb-1 tracking-tight">Settings</h1>
+            <p className="text-[10px] text-gray-400 mb-6">Manage your account and preferences.</p>
 
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-100">
                 <div className="p-6 flex items-center justify-between">

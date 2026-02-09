@@ -51,9 +51,9 @@ export default async function LeadsPage() {
 
     return (
         <div>
-            <div className="mb-8">
-                <h1 className="text-2xl font-bold text-slate-900">Leads Management</h1>
-                <p className="text-slate-500 text-sm">
+            <div className="mb-6">
+                <h1 className="text-sm font-semibold text-slate-800 tracking-tight">Leads Management</h1>
+                <p className="text-gray-400 text-[10px] mt-0.5">
                     {role === 'company_admin' ? 'Manage all potential clients across your team.' : 'Track and manage your personal leads.'}
                 </p>
             </div>

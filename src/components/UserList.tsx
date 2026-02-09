@@ -38,18 +38,18 @@ export default function UserList({ users, companyId, currentUserRole }: { users:
 
     return (
         <div>
-            <div className="flex justify-end mb-6">
+            <div className="flex justify-end mb-4">
                 <button
                     onClick={() => setShowAddForm(!showAddForm)}
-                    className="bg-slate-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-black transition-colors"
+                    className="bg-slate-900 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-black transition-colors shadow-sm"
                 >
                     {showAddForm ? 'Cancel' : '+ Add User'}
                 </button>
             </div>
 
             {showAddForm && (
-                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-lg mb-8 animate-in fade-in slide-in-from-top-4">
-                    <h3 className="text-lg font-semibold mb-4">New User Details</h3>
+                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-lg mb-6 animate-in fade-in slide-in-from-top-4">
+                    <h3 className="text-sm font-semibold mb-3 tracking-tight">New User Details</h3>
                     <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>

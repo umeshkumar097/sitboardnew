@@ -25,9 +25,12 @@ export default async function UsersPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-slate-900">All Users ({users.length})</h1>
-                <Link href="/dashboard/companies" className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 text-sm font-medium">
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h1 className="text-sm font-semibold text-slate-800 tracking-tight">All Users <span className="text-gray-400 font-normal">({users.length})</span></h1>
+                    <p className="text-gray-400 text-[10px] mt-0.5">Manage system and company users.</p>
+                </div>
+                <Link href="/dashboard/companies" className="px-3 py-1.5 bg-slate-900 text-white rounded text-xs font-medium hover:bg-black transition-colors shadow-sm">
                     Add User via Company
                 </Link>
             </div>

@@ -12,10 +12,21 @@ export default function CompanyList({ initialCompanies }: { initialCompanies: an
     const [loading, setLoading] = useState(false);
 
     // Edit Form State
-    const [editForm, setEditForm] = useState({
+    const [editForm, setEditForm] = useState<{
+        plan: string;
+        subscription_status: string;
+        extend_trial_days: number;
+        duration?: string;
+        customEndDate?: string;
+        amount?: number;
+        generateReceipt?: boolean;
+    }>({
         plan: 'trial',
         subscription_status: 'active',
-        extend_trial_days: 0
+        extend_trial_days: 0,
+        duration: 'monthly',
+        amount: 0,
+        generateReceipt: false
     });
 
     const handleEditClick = (company: any) => {
@@ -23,7 +34,10 @@ export default function CompanyList({ initialCompanies }: { initialCompanies: an
         setEditForm({
             plan: company.plan || 'trial',
             subscription_status: company.subscription_status || 'active',
-            extend_trial_days: 0
+            extend_trial_days: 0,
+            duration: 'monthly',
+            amount: 0,
+            generateReceipt: false
         });
         setShowEditModal(true);
     };
@@ -80,28 +94,28 @@ export default function CompanyList({ initialCompanies }: { initialCompanies: an
                                 </td>
                                 <td className="px-6 py-4">
                                     <span className={`px-2 py-1 rounded-full text-xs font-semibold capitalize ${company.plan === 'enterprise' ? 'bg-purple-100 text-purple-700' :
-                                            company.plan === 'business' ? 'bg-blue-100 text-blue-700' :
-                                                company.plan === 'starter' ? 'bg-indigo-100 text-indigo-700' :
-                                                    'bg-slate-100 text-slate-700'
+                                        company.plan === 'business' ? 'bg-blue-100 text-blue-700' :
+                                            company.plan === 'starter' ? 'bg-indigo-100 text-indigo-700' :
+                                                'bg-slate-100 text-slate-700'
                                         }`}>
                                         {company.plan || 'Trial'}
                                     </span>
                                     {company.plan === 'trial' && company.trial_ends_at && (
                                         <div className="text-xs text-orange-600 mt-1 font-medium">
-                                            Ends: {new Date(company.trial_ends_at).toLocaleDateString()}
+                                            Ends: {new Date(company.trial_ends_at).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                                         </div>
                                     )}
                                 </td>
                                 <td className="px-6 py-4">
                                     <span className={`px-2 py-1 rounded-full text-xs font-semibold uppercase ${company.subscription_status === 'active' ? 'bg-green-100 text-green-700' :
-                                            'bg-red-100 text-red-700'
+                                        'bg-red-100 text-red-700'
                                         }`}>
                                         {company.subscription_status || 'Active'}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-slate-600 font-mono text-sm">{company.user_count}</td>
                                 <td className="px-6 py-4 text-slate-500 text-sm">
-                                    {new Date(company.created_at).toLocaleDateString()}
+                                    {new Date(company.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                                 </td>
                                 <td className="px-6 py-4 text-right">
                                     <div className="flex justify-end gap-3 items-center">
@@ -157,6 +171,67 @@ export default function CompanyList({ initialCompanies }: { initialCompanies: an
                                     <option value="cancelled">Cancelled</option>
                                 </select>
                             </div>
+
+                            {editForm.plan !== 'trial' && (
+                                <>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Duration</label>
+                                        <select
+                                            className="w-full px-3 py-2 border rounded-lg bg-white"
+                                            value={editForm.duration || 'monthly'}
+                                            onChange={e => {
+                                                const duration = e.target.value;
+                                                let amount = 0;
+                                                if (editForm.plan === 'starter') amount = duration === 'yearly' ? 290 : 29;
+                                                if (editForm.plan === 'business') amount = duration === 'yearly' ? 790 : 79;
+                                                if (editForm.plan === 'enterprise') amount = duration === 'yearly' ? 2990 : 299;
+
+                                                setEditForm({ ...editForm, duration, amount });
+                                            }}
+                                        >
+                                            <option value="monthly">Monthly</option>
+                                            <option value="yearly">Yearly (Save 20%)</option>
+                                            <option value="custom">Custom Date</option>
+                                        </select>
+                                    </div>
+
+                                    {editForm.duration === 'custom' && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">End Date</label>
+                                            <input
+                                                type="date"
+                                                className="w-full px-3 py-2 border rounded-lg"
+                                                value={editForm.customEndDate || ''}
+                                                onChange={e => setEditForm({ ...editForm, customEndDate: e.target.value })}
+                                            />
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Amount (Paid)</label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-2 text-slate-500">$</span>
+                                            <input
+                                                type="number"
+                                                className="w-full pl-7 pr-3 py-2 border rounded-lg"
+                                                value={editForm.amount || 0}
+                                                onChange={e => setEditForm({ ...editForm, amount: parseFloat(e.target.value) || 0 })}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 pt-2">
+                                        <input
+                                            type="checkbox"
+                                            id="genReceipt"
+                                            className="w-4 h-4 text-slate-900 border-gray-300 rounded focus:ring-slate-900"
+                                            checked={editForm.generateReceipt || false}
+                                            onChange={e => setEditForm({ ...editForm, generateReceipt: e.target.checked })}
+                                        />
+                                        <label htmlFor="genReceipt" className="text-sm text-slate-700 font-medium">Generate Invoice & Extend Subscription</label>
+                                    </div>
+                                </>
+                            )}
 
                             {editForm.plan === 'trial' && (
                                 <div>

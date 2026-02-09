@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import SignupForm from '@/components/SignupForm';
 import PricingSection from '@/components/PricingSection';
+import BrandLogo from '@/components/BrandLogo';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -15,11 +16,8 @@ export default function Home() {
 
       {/* Navbar */}
       <nav className="navbar">
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
-            <div style={{ width: '32px', height: '32px', background: 'var(--accent)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '1.25rem' }}>S</div>
-            SiteBoard
-          </div>
+        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+          <BrandLogo className="w-8 h-8" textClassName="text-xl" />
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
             <Link href="#features" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontWeight: 500, fontSize: '0.95rem' }} className="hidden md:block">Features</Link>
             <Link href="#faq" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontWeight: 500, fontSize: '0.95rem' }} className="hidden md:block">FAQ</Link>

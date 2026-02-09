@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import BrandLogo from './BrandLogo';
 
 const Icons = {
     Menu: () => (
@@ -34,36 +35,41 @@ export default function TopNav({ user, onMenuClick }: { user: any, onMenuClick: 
     };
 
     return (
-        <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 sticky top-0 z-30">
+        <header className="h-14 bg-white border-b border-gray-100 flex items-center justify-between px-4 sticky top-0 z-30">
             {/* Left: Mobile Menu & Breadcrumb */}
             <div className="flex items-center gap-4">
                 <button onClick={onMenuClick} className="md:hidden text-gray-500 hover:text-slate-900">
                     <Icons.Menu />
                 </button>
-                <h1 className="text-xl font-bold text-slate-800 tracking-tight hidden sm:block">
-                    {getPageTitle()}
-                </h1>
+                <div className="md:hidden">
+                    <BrandLogo className="w-5 h-5" textClassName="text-sm" />
+                </div>
+                <div className="hidden sm:flex flex-col">
+                    <h1 className="text-sm font-semibold text-slate-800 tracking-tight leading-tight">
+                        {getPageTitle()}
+                    </h1>
+                </div>
             </div>
 
             {/* Right: Actions & Profile */}
-            <div className="flex items-center gap-4">
-                <button className="text-gray-400 hover:text-slate-800 transition-colors relative">
+            <div className="flex items-center gap-3">
+                <button className="text-gray-400 hover:text-slate-800 transition-colors relative p-1.5 hover:bg-slate-50 rounded-full">
                     <Icons.Bell />
-                    <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                 </button>
 
-                <div className="border-l border-gray-100 h-8 mx-2 hidden sm:block"></div>
+                <div className="border-l border-gray-100 h-6 mx-1 hidden sm:block"></div>
 
                 <div className="relative">
                     <button
                         onClick={() => setDropdownOpen(!dropdownOpen)}
-                        className="flex items-center gap-3 appearance-none focus:outline-none"
+                        className="flex items-center gap-3 appearance-none focus:outline-none group"
                     >
                         <div className="text-right hidden sm:block">
-                            <p className="text-sm font-semibold text-slate-800 leading-none">{user.name}</p>
-                            <p className="text-xs text-gray-500 mt-1 capitalize">{user.role?.replace('_', ' ')}</p>
+                            <p className="text-xs font-semibold text-slate-700 group-hover:text-slate-900">{user.name}</p>
+                            <p className="text-[10px] text-gray-400 mt-0.5 capitalize">{user.role?.replace('_', ' ')}</p>
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold border border-gray-200">
+                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-sm font-bold border border-gray-200 group-hover:border-gray-300 transition-colors">
                             {user.name?.[0]?.toUpperCase() || 'U'}
                         </div>
                     </button>

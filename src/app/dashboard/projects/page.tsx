@@ -36,13 +36,13 @@ export default async function ProjectsPage() {
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Projects</h1>
-                    <p className="text-slate-500 text-sm">Manage your real estate projects</p>
+                    <h1 className="text-sm font-semibold text-slate-800 tracking-tight">Projects</h1>
+                    <p className="text-gray-400 text-[10px] mt-0.5">Manage your real estate projects</p>
                 </div>
                 {role === 'company_admin' && (
-                    <Link href="/dashboard/projects/new" className="bg-slate-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-black transition-colors shadow-lg">
+                    <Link href="/dashboard/projects/new" className="bg-slate-900 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-black transition-colors shadow-sm">
                         + New Project
                     </Link>
                 )}

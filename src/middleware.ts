@@ -39,7 +39,15 @@ export async function middleware(request: NextRequest) {
         }
     }
 
-    return NextResponse.next();
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-url', request.url);
+    requestHeaders.set('x-pathname', request.nextUrl.pathname);
+
+    return NextResponse.next({
+        request: {
+            headers: requestHeaders,
+        }
+    });
 }
 
 export const config = {

@@ -24,9 +24,9 @@ export default function DashboardLayoutClient({
         <div className="flex min-h-screen bg-gray-50/50 overscroll-none text-slate-900 font-sans antialiased">
             <Sidebar user={user} isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
-            <div className="flex-1 flex flex-col md:ml-64 transition-all duration-300">
+            <div className="flex-1 flex flex-col md:ml-60 transition-all duration-300">
                 <TopNav user={user} onMenuClick={() => setSidebarOpen(true)} />
-                <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full">
+                <main className="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
                     {children}
                 </main>
             </div>
