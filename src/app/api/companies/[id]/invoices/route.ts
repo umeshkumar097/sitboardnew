@@ -4,7 +4,7 @@ import { getSession } from '@/lib/auth';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const session = await getSession();
-    if (!session || (session.role !== 'super_admin' && session.companyId !== parseInt((await params).id))) {
+    if (!session || (session.role !== 'super_admin' && session.company_id !== parseInt((await params).id))) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
