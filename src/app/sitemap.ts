@@ -1,18 +1,44 @@
 import { MetadataRoute } from 'next';
+import { KEYWORD_CONFIG } from '@/lib/seo-config';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    return [
+    const baseUrl = 'https://siteboard.in';
+
+    // Static Routes
+    const staticRoutes = [
         {
-            url: 'https://siteboard.in',
+            url: baseUrl,
             lastModified: new Date(),
-            changeFrequency: 'weekly', // Keep it simple
+            changeFrequency: 'weekly' as const,
             priority: 1,
         },
         {
-            url: 'https://siteboard.in/admin/login',
+            url: `${baseUrl}/admin/login`,
             lastModified: new Date(),
-            changeFrequency: 'monthly',
+            changeFrequency: 'monthly' as const,
             priority: 0.5,
         },
+        {
+            url: `${baseUrl}/login`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly' as const,
+            priority: 0.8,
+        },
+        {
+            url: `${baseUrl}/signup`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly' as const,
+            priority: 0.8,
+        },
     ];
+
+    // Dynamic SEO Routes
+    const seoRoutes = Object.keys(KEYWORD_CONFIG).map((slug) => ({
+        url: `${baseUrl}/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+    }));
+
+    return [...staticRoutes, ...seoRoutes];
 }
