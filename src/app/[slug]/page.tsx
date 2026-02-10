@@ -4,13 +4,15 @@ import LandingPageTemplate from '@/components/LandingPageTemplate';
 import { KEYWORD_CONFIG } from '@/lib/seo-config';
 
 // Start: Fix for missing Params type
+// Start: Fix for missing Params type
 interface PageProps {
-    params: { slug: string };
-    searchParams?: { [key: string]: string | string[] | undefined };
+    params: Promise<{ slug: string }>;
+    searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 // End: Fix for missing Params type
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+    const params = await props.params;
     const config = KEYWORD_CONFIG[params.slug];
 
     if (!config) {
@@ -33,7 +35,8 @@ export function generateStaticParams() {
     }));
 }
 
-export default function KeywordLandingPage({ params }: PageProps) {
+export default async function KeywordLandingPage(props: PageProps) {
+    const params = await props.params;
     const config = KEYWORD_CONFIG[params.slug];
 
     if (!config) {
@@ -45,6 +48,10 @@ export default function KeywordLandingPage({ params }: PageProps) {
             headline={config.headline}
             subheadline={config.subheadline}
             source={params.slug}
+            features={config.features}
+            benefits={config.benefits}
+            ctaText={config.ctaText}
+            faqs={config.faqs}
         />
     );
 }

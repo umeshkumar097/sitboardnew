@@ -3,16 +3,35 @@ import SignupForm from '@/components/SignupForm';
 import PricingSection from '@/components/PricingSection';
 import BrandLogo from '@/components/BrandLogo';
 
+interface SeoFeature {
+    title: string;
+    description: string;
+    icon: string;
+}
+
+interface SeoFaq {
+    question: string;
+    answer: string;
+}
+
 interface LandingPageProps {
     headline?: React.ReactNode;
     subheadline?: string;
     source?: string;
+    features?: SeoFeature[];
+    benefits?: string[];
+    ctaText?: string;
+    faqs?: SeoFaq[];
 }
 
 export default function LandingPageTemplate({
     headline,
     subheadline,
-    source = 'home'
+    source = 'home',
+    features,
+    benefits,
+    ctaText = 'Get Early Access',
+    faqs
 }: LandingPageProps) {
     return (
         <main style={{ overflowX: 'hidden' }}>
@@ -33,7 +52,7 @@ export default function LandingPageTemplate({
             </nav>
 
             {/* Hero Section */}
-            <section className="section-hero">
+            <section className="section-hero" style={{ padding: '4rem 0 6rem' }}>
                 <div className="container grid-2" style={{ alignItems: 'center', gap: '4rem' }}>
 
                     {/* Hero Content */}
@@ -50,10 +69,10 @@ export default function LandingPageTemplate({
                             marginBottom: '1.5rem',
                             border: '1px solid #dbeafe'
                         }}>
-                            <span style={{ marginRight: '8px' }}>🚀</span> Pre-Launch Access
+                            <span style={{ marginRight: '8px' }}>🚀</span> {source === 'home' ? 'Pre-Launch Access' : 'Top Rated Software'}
                         </div>
 
-                        <h1 className="text-gradient" style={{ marginBottom: '1.5rem' }}>
+                        <h1 className="text-gradient" style={{ marginBottom: '1.5rem', fontSize: '3rem', lineHeight: 1.2 }}>
                             {headline || (
                                 <>
                                     India's Best <br />
@@ -63,7 +82,7 @@ export default function LandingPageTemplate({
                             )}
                         </h1>
 
-                        <p style={{ fontSize: '1.25rem', lineHeight: 1.6, marginBottom: '2.5rem', maxWidth: '540px' }}>
+                        <p style={{ fontSize: '1.25rem', lineHeight: 1.6, marginBottom: '2rem', maxWidth: '540px', color: 'var(--text-muted)' }}>
                             {subheadline || (
                                 <>
                                     Stop managing multi-crore projects on WhatsApp and Excel.
@@ -72,70 +91,86 @@ export default function LandingPageTemplate({
                             )}
                         </p>
 
-                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                            <Link href="#signup" className="btn btn-primary" style={{ minWidth: '180px' }}>
-                                Start Free Trial
-                            </Link>
-                            <Link href="#features" className="btn btn-secondary" style={{ minWidth: '180px' }}>
-                                See Features
-                            </Link>
-                        </div>
-
-                        <div style={{ marginTop: '4rem', display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-                            <div style={{ display: 'flex', marginLeft: '-10px' }}>
-                                {[1, 2, 3, 4].map(i => (
-                                    <div key={i} style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#e2e8f0', border: '2px solid white', marginLeft: '-8px' }}></div>
+                        {/* Dynamic Benefits Checkmarks (visible if key benefits provided) */}
+                        {benefits && (
+                            <ul style={{ listStyle: 'none', padding: 0, marginBottom: '2.5rem' }}>
+                                {benefits.map((benefit, i) => (
+                                    <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 500, color: '#334155' }}>
+                                        <div style={{ minWidth: '24px', height: '24px', background: '#dcfce7', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#166534', fontSize: '14px' }}>✓</div>
+                                        {benefit}
+                                    </li>
                                 ))}
+                            </ul>
+                        )}
+
+                        {/* Only show buttons if NOT a landing page (source=='home'), otherwise form is on the right */}
+                        {source === 'home' && (
+                            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                                <Link href="#signup" className="btn btn-primary" style={{ minWidth: '180px' }}>
+                                    Start Free Trial
+                                </Link>
+                                <Link href="#features" className="btn btn-secondary" style={{ minWidth: '180px' }}>
+                                    See Features
+                                </Link>
                             </div>
-                            <p style={{ margin: 0 }}>Trusted by 50+ Builders in India</p>
-                        </div>
+                        )}
                     </div>
 
-                    {/* Hero Visual */}
-                    <div className="dashboard-container">
-                        <div className="mockup-header">
-                            <div style={{ display: 'flex', gap: '6px' }}>
-                                <div className="traffic-light traffic-red"></div>
-                                <div className="traffic-light traffic-yellow"></div>
-                                <div className="traffic-light traffic-green"></div>
+                    {/* Right Side: Signup Form (for landing pages) OR Visual (for home) */}
+                    <div>
+                        {source !== 'home' ? (
+                            <div style={{ background: 'white', padding: '2rem', borderRadius: '1rem', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', border: '1px solid #e2e8f0' }}>
+                                <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', textAlign: 'center' }}>{ctaText}</h3>
+                                <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Fill the form below to get instant access.</p>
+                                <SignupForm source={source} />
                             </div>
-                            <div style={{ flex: 1, textAlign: 'center', fontSize: '12px', color: '#94a3b8', fontFamily: 'monospace' }}>
-                                app.siteboard.in
-                            </div>
-                        </div>
-                        <div className="mockup-body">
-                            <div className="mockup-sidebar">
-                                <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '1rem' }}>Green Valley</div>
-                                <div className="sidebar-item sidebar-item-primary"></div>
-                                <div className="sidebar-item"></div>
-                                <div className="sidebar-item"></div>
-                            </div>
-                            <div className="mockup-main">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
-                                    <div style={{ fontWeight: 700, fontSize: '18px' }}>Phase 1 Layout</div>
-                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                        <span style={{ fontSize: '10px', padding: '4px 8px', background: '#dcfce7', color: '#166534', borderRadius: '4px', fontWeight: 600 }}>12 Available</span>
-                                        <span style={{ fontSize: '10px', padding: '4px 8px', background: '#fef9c3', color: '#854d0e', borderRadius: '4px', fontWeight: 600 }}>8 Booked</span>
+                        ) : (
+                            <div className="dashboard-container">
+                                <div className="mockup-header">
+                                    <div style={{ display: 'flex', gap: '6px' }}>
+                                        <div className="traffic-light traffic-red"></div>
+                                        <div className="traffic-light traffic-yellow"></div>
+                                        <div className="traffic-light traffic-green"></div>
+                                    </div>
+                                    <div style={{ flex: 1, textAlign: 'center', fontSize: '12px', color: '#94a3b8', fontFamily: 'monospace' }}>
+                                        app.siteboard.in
                                     </div>
                                 </div>
-
-                                <div className="mockup-grid">
-                                    {Array.from({ length: 24 }).map((_, i) => {
-                                        let statusClass = 'pl-available';
-                                        if ([1, 4, 5, 12, 15, 20].includes(i)) statusClass = 'pl-booked';
-                                        if ([2, 6, 7, 8, 18].includes(i)) statusClass = 'pl-sold';
-
-                                        return (
-                                            <div key={i} className={`plot-cell ${statusClass}`} style={{
-                                                backgroundColor: statusClass === 'pl-available' ? 'white' : undefined
-                                            }}>
-                                                {i + 101}
+                                <div className="mockup-body">
+                                    <div className="mockup-sidebar">
+                                        <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '1rem' }}>Green Valley</div>
+                                        <div className="sidebar-item sidebar-item-primary"></div>
+                                        <div className="sidebar-item"></div>
+                                        <div className="sidebar-item"></div>
+                                    </div>
+                                    <div className="mockup-main">
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
+                                            <div style={{ fontWeight: 700, fontSize: '18px' }}>Phase 1 Layout</div>
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <span style={{ fontSize: '10px', padding: '4px 8px', background: '#dcfce7', color: '#166534', borderRadius: '4px', fontWeight: 600 }}>12 Available</span>
+                                                <span style={{ fontSize: '10px', padding: '4px 8px', background: '#fef9c3', color: '#854d0e', borderRadius: '4px', fontWeight: 600 }}>8 Booked</span>
                                             </div>
-                                        )
-                                    })}
+                                        </div>
+
+                                        <div className="mockup-grid">
+                                            {Array.from({ length: 24 }).map((_, i) => {
+                                                let statusClass = 'pl-available';
+                                                if ([1, 4, 5, 12, 15, 20].includes(i)) statusClass = 'pl-booked';
+                                                if ([2, 6, 7, 8, 18].includes(i)) statusClass = 'pl-sold';
+
+                                                return (
+                                                    <div key={i} className={`plot-cell ${statusClass}`} style={{
+                                                        backgroundColor: statusClass === 'pl-available' ? 'white' : undefined
+                                                    }}>
+                                                        {i + 101}
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </div>
 
                 </div>
@@ -160,19 +195,19 @@ export default function LandingPageTemplate({
             <section id="features" style={{ padding: '6rem 0', background: 'white' }}>
                 <div className="container">
                     <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                        <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>Comprehensive Real Estate ERP Software for Layout Management</h2>
+                        <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>Comprehensive {source === 'home' ? 'Real Estate ERP' : 'Software'} Features</h2>
                         <p style={{ fontSize: '1.25rem', maxWidth: '700px', margin: '0 auto', color: 'var(--text-muted)' }}>
-                            SiteBoard gives you complete control and visibility over your projects, plots, bookings, and sales.
+                            Everything you need to manage your {source === 'home' ? 'real estate business' : 'projects'} efficiently.
                         </p>
                     </div>
 
-                    {/* Feature 1: Visual Map (Highlight) */}
+                    {/* Feature 1: Visual Map (Highlight) - Always show as it's core */}
                     <div className="grid-2" style={{ alignItems: 'center', marginBottom: '6rem' }}>
                         <div>
                             <div style={{ display: 'inline-block', padding: '4px 12px', background: '#eff6ff', color: '#2563eb', borderRadius: '100px', fontSize: '0.875rem', fontWeight: 700, marginBottom: '1rem' }}>
                                 MOST IMPORTANT FEATURE
                             </div>
-                            <h3 style={{ fontSize: '2rem', marginBottom: '1.5rem' }}>1. Visual Plot Map</h3>
+                            <h3 style={{ fontSize: '2rem', marginBottom: '1.5rem' }}>Visual Plot Map</h3>
                             <p style={{ fontSize: '1.125rem', marginBottom: '2rem', color: 'var(--text-muted)' }}>
                                 Stop guessing. See your entire project in a clear grid format. Anyone can instantly see plot status without asking or calling.
                             </p>
@@ -218,44 +253,57 @@ export default function LandingPageTemplate({
                         </div>
                     </div>
 
-                    {/* Other Core Features Grid */}
-                    <div className="grid-3" style={{ gap: '2rem' }}>
-                        <div className="feature-card">
-                            <div className="icon-box">🏢</div>
-                            <h4 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Company-Level Control</h4>
-                            <p>Each real estate company gets its own private system. Your data is never shared. You have full control over your projects.</p>
+                    {/* Dynamic Core Features Grid */}
+                    {features && features.length > 0 ? (
+                        <div className="grid-3" style={{ gap: '2rem' }}>
+                            {features.map((feature, i) => (
+                                <div key={i} className="feature-card">
+                                    <div className="icon-box">{feature.icon}</div>
+                                    <h4 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>{feature.title}</h4>
+                                    <p>{feature.description}</p>
+                                </div>
+                            ))}
                         </div>
+                    ) : (
+                        // Fallback static features if no prop provided (e.g. Home page default)
+                        <div className="grid-3" style={{ gap: '2rem' }}>
+                            <div className="feature-card">
+                                <div className="icon-box">🏢</div>
+                                <h4 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Company-Level Control</h4>
+                                <p>Each real estate company gets its own private system. Your data is never shared. You have full control over your projects.</p>
+                            </div>
 
-                        <div className="feature-card">
-                            <div className="icon-box">📍</div>
-                            <h4 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Project-Wise Management</h4>
-                            <p>Organize multiple sites easily. Create projects location-wise. You can activate or deactivate projects anytime.</p>
-                        </div>
+                            <div className="feature-card">
+                                <div className="icon-box">📍</div>
+                                <h4 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Project-Wise Management</h4>
+                                <p>Organize multiple sites easily. Create projects location-wise. You can activate or deactivate projects anytime.</p>
+                            </div>
 
-                        <div className="feature-card">
-                            <div className="icon-box">🔒</div>
-                            <h4 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Zero Double Booking</h4>
-                            <p>A plot must move step-by-step: Available → Booked → Sold. Once sold, it is locked. Double booking is impossible.</p>
-                        </div>
+                            <div className="feature-card">
+                                <div className="icon-box">🔒</div>
+                                <h4 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Zero Double Booking</h4>
+                                <p>A plot must move step-by-step: Available → Booked → Sold. Once sold, it is locked. Double booking is impossible.</p>
+                            </div>
 
-                        <div className="feature-card">
-                            <div className="icon-box">📝</div>
-                            <h4 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Booking Management</h4>
-                            <p>Capture client name, agent, and date at booking. If cancelled, the plot automatically becomes available again.</p>
-                        </div>
+                            <div className="feature-card">
+                                <div className="icon-box">📝</div>
+                                <h4 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Booking Management</h4>
+                                <p>Capture client name, agent, and date at booking. If cancelled, the plot automatically becomes available again.</p>
+                            </div>
 
-                        <div className="feature-card">
-                            <div className="icon-box">👀</div>
-                            <h4 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Agent View-Only Access</h4>
-                            <p>Agents can view prices and availability via their own login, but they cannot change anything. Prevents confusion.</p>
-                        </div>
+                            <div className="feature-card">
+                                <div className="icon-box">👀</div>
+                                <h4 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Agent View-Only Access</h4>
+                                <p>Agents can view prices and availability via their own login, but they cannot change anything. Prevents confusion.</p>
+                            </div>
 
-                        <div className="feature-card">
-                            <div className="icon-box">👑</div>
-                            <h4 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Owner Admin Control</h4>
-                            <p>Only the admin can update statuses. As the owner, you always know the truth without depending on agent reports.</p>
+                            <div className="feature-card">
+                                <div className="icon-box">👑</div>
+                                <h4 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Owner Admin Control</h4>
+                                <p>Only the admin can update statuses. As the owner, you always know the truth without depending on agent reports.</p>
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Quick List */}
                     <div style={{ marginTop: '4rem', textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap', color: 'var(--text-muted)' }}>
@@ -324,33 +372,47 @@ export default function LandingPageTemplate({
                 <div className="container" style={{ maxWidth: '800px' }}>
                     <h2 style={{ textAlign: 'center', marginBottom: '3rem' }}>Frequently Asked Questions</h2>
 
-                    <details className="faq-item">
-                        <summary className="faq-summary">What makes SiteBoard the best real estate software? <span>+</span></summary>
-                        <div className="faq-content">
-                            SiteBoard is a dedicated Real Estate CRM Software designed for Indian developers. Unlike generic tools, it offers specialized plot management, making it the best real estate management software for layout developers.
-                        </div>
-                    </details>
+                    {faqs && faqs.length > 0 ? (
+                        faqs.map((faq, i) => (
+                            <details key={i} className="faq-item">
+                                <summary className="faq-summary">{faq.question} <span>+</span></summary>
+                                <div className="faq-content">
+                                    {faq.answer}
+                                </div>
+                            </details>
+                        ))
+                    ) : (
+                        // Fallback static FAQs
+                        <>
+                            <details className="faq-item">
+                                <summary className="faq-summary">What makes SiteBoard the best real estate software? <span>+</span></summary>
+                                <div className="faq-content">
+                                    SiteBoard is a dedicated Real Estate CRM Software designed for Indian developers. Unlike generic tools, it offers specialized plot management, making it the best real estate management software for layout developers.
+                                </div>
+                            </details>
 
-                    <details className="faq-item">
-                        <summary className="faq-summary">Does it prevent double bookings? <span>+</span></summary>
-                        <div className="faq-content">
-                            Yes. Once a plot is marked 'Booked', it is instantly locked for all other agents, preventing any collaborative errors.
-                        </div>
-                    </details>
+                            <details className="faq-item">
+                                <summary className="faq-summary">Does it prevent double bookings? <span>+</span></summary>
+                                <div className="faq-content">
+                                    Yes. Once a plot is marked 'Booked', it is instantly locked for all other agents, preventing any collaborative errors.
+                                </div>
+                            </details>
 
-                    <details className="faq-item">
-                        <summary className="faq-summary">Is my data secure? <span>+</span></summary>
-                        <div className="faq-content">
-                            Absolutely. We use enterprise-grade encryption and daily backups. Your customer data and pricing strategies are 100% private.
-                        </div>
-                    </details>
+                            <details className="faq-item">
+                                <summary className="faq-summary">Is my data secure? <span>+</span></summary>
+                                <div className="faq-content">
+                                    Absolutely. We use enterprise-grade encryption and daily backups. Your customer data and pricing strategies are 100% private.
+                                </div>
+                            </details>
 
-                    <details className="faq-item">
-                        <summary className="faq-summary">How much does it cost? <span>+</span></summary>
-                        <div className="faq-content">
-                            We are currently in a private pre-launch phase. Early access partners get exclusive lifetime pricing. Request access to learn more.
-                        </div>
-                    </details>
+                            <details className="faq-item">
+                                <summary className="faq-summary">How much does it cost? <span>+</span></summary>
+                                <div className="faq-content">
+                                    We are currently in a private pre-launch phase. Early access partners get exclusive lifetime pricing. Request access to learn more.
+                                </div>
+                            </details>
+                        </>
+                    )}
                 </div>
             </section>
 
