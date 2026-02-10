@@ -22,10 +22,17 @@ export default function SignupForm() {
         setStatus('loading');
 
         try {
-            const res = await fetch('/api/leads', {
+            const res = await fetch('/api/contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({
+                    name: formData.name,
+                    email: formData.email,
+                    phone: formData.whatsapp,
+                    company_name: formData.company_name,
+                    message: `City: ${formData.city}`,
+                    plan_interest: 'Pre-Layout Signup'
+                }),
             });
 
             const data = await res.json();
