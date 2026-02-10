@@ -52,8 +52,8 @@ export default function LandingPageTemplate({
             </nav>
 
             {/* Hero Section */}
-            <section className="section-hero" style={{ padding: '4rem 0 6rem' }}>
-                <div className="container grid-2" style={{ alignItems: 'center', gap: '4rem' }}>
+            <section className="section-hero">
+                <div className="container grid-2" style={{ alignItems: 'center' }}>
 
                     {/* Hero Content */}
                     <div>
@@ -72,7 +72,7 @@ export default function LandingPageTemplate({
                             <span style={{ marginRight: '8px' }}>🚀</span> {source === 'home' ? 'Pre-Launch Access' : 'Top Rated Software'}
                         </div>
 
-                        <h1 className="text-gradient" style={{ marginBottom: '1.5rem', fontSize: '3rem', lineHeight: 1.2 }}>
+                        <h1 className="text-gradient" style={{ marginBottom: '1.5rem' }}>
                             {headline || (
                                 <>
                                     India's Best <br />
