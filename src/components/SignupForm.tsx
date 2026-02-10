@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-export default function SignupForm() {
+export default function SignupForm({ source = 'home' }: { source?: string }) {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -30,7 +30,7 @@ export default function SignupForm() {
                     email: formData.email,
                     phone: formData.whatsapp,
                     company_name: formData.company_name,
-                    message: `City: ${formData.city}`,
+                    message: `City: ${formData.city} | Source: ${source}`,
                     plan_interest: 'Pre-Layout Signup'
                 }),
             });
