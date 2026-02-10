@@ -10,7 +10,7 @@ export async function getStripeClient() {
         }
         const secretKey = res.rows[0].secret_key;
         return new Stripe(secretKey, {
-            apiVersion: '2025-01-27.acacia', // Use latest or pinned version
+            apiVersion: '2026-01-28.clover', // Use latest or pinned version
             typescript: true,
         });
     } finally {
