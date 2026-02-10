@@ -1,9 +1,0 @@
-DATABASE_URL=postgresql://neondb_owner:npg_4BkRbPwmgNl6@ep-muddy-shadow-aibt7rjo-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
-ADMIN_EMAIL=info@aiclex.in
-ADMIN_PASSWORD=Umesh@2003##
-JWT_SECRET=super-secret-key-change-this-in-production-12345
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
-FROM_EMAIL=SiteBoard <no-reply@siteboard.in>
