@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import 'react-quill-new/dist/quill.snow.css';
+
+// Dynamic import for ReactQuill to avoid SSR issues
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
 export default function NewBlogPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
 
     // Form state
     const [formData, setFormData] = useState({
@@ -29,6 +35,10 @@ export default function NewBlogPage() {
         setFormData(prev => ({ ...prev, [name]: checked }));
     };
 
+    const handleContentChange = (value: string) => {
+        setFormData(prev => ({ ...prev, content: value }));
+    };
+
     // Auto-generate slug from title
     const handleTitleBlur = () => {
         if (!formData.slug && formData.title) {
@@ -40,11 +50,49 @@ export default function NewBlogPage() {
         }
     };
 
+    // Image Upload Handler
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.[0]) return;
+
+        const file = e.target.files[0];
+        setUploading(true);
+
+        try {
+            const response = await fetch(
+                `/api/upload?filename=${encodeURIComponent(file.name)}`,
+                {
+                    method: 'POST',
+                    body: file,
+                },
+            );
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Upload failed');
+            }
+
+            const newBlob = await response.json();
+            setFormData(prev => ({ ...prev, featured_image: newBlob.url }));
+        } catch (error) {
+            console.error('Upload Error:', error);
+            alert('Failed to upload image. Checks logs or ensure BLOB_READ_WRITE_TOKEN is set.');
+        } finally {
+            setUploading(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
         try {
+            // Basic validation
+            if (!formData.title || !formData.slug || !formData.content) {
+                alert('Please fill in all required fields (Title, Slug, Content)');
+                setLoading(false);
+                return;
+            }
+
             const res = await fetch('/api/admin/blogs', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -66,8 +114,18 @@ export default function NewBlogPage() {
         }
     };
 
+    const modules = useMemo(() => ({
+        toolbar: [
+            [{ header: [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['link', 'image'],
+            ['clean'],
+        ],
+    }), []);
+
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-4xl mx-auto space-y-6 pb-20">
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold text-slate-800">Create New Blog</h1>
             </div>
@@ -105,19 +163,18 @@ export default function NewBlogPage() {
                     </div>
                 </div>
 
-                {/* Content */}
+                {/* Content - ReactQuill */}
                 <div className="space-y-1">
                     <label className="text-sm font-medium text-slate-700">Content <span className="text-red-500">*</span></label>
-                    <textarea
-                        name="content"
-                        value={formData.content}
-                        onChange={handleChange}
-                        required
-                        rows={12}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 font-mono text-sm"
-                        placeholder="Write your blog content here (Markdown supported if you want to implement rendering later)..."
-                    />
-                    <p className="text-xs text-gray-400">Basic HTML is supported.</p>
+                    <div className="prose-editor">
+                        <ReactQuill
+                            theme="snow"
+                            value={formData.content}
+                            onChange={handleContentChange}
+                            modules={modules}
+                            className="h-64 mb-12"
+                        />
+                    </div>
                 </div>
 
                 {/* Excerpt */}
@@ -134,17 +191,46 @@ export default function NewBlogPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Featured Image */}
+                    {/* Featured Image - Upload */}
                     <div className="space-y-1">
-                        <label className="text-sm font-medium text-slate-700">Featured Image URL</label>
-                        <input
-                            type="url"
-                            name="featured_image"
-                            value={formData.featured_image}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900"
-                            placeholder="https://example.com/image.jpg"
-                        />
+                        <label className="text-sm font-medium text-slate-700">Featured Image</label>
+
+                        <div className="flex gap-4 items-start">
+                            <div className="flex-1">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                    disabled={uploading}
+                                    className="block w-full text-sm text-slate-500
+                                      file:mr-4 file:py-2 file:px-4
+                                      file:rounded-full file:border-0
+                                      file:text-sm file:font-semibold
+                                      file:bg-slate-50 file:text-slate-700
+                                      hover:file:bg-slate-100
+                                    "
+                                />
+                                {uploading && <p className="text-xs text-blue-500 mt-1">Uploading...</p>}
+                            </div>
+                        </div>
+
+                        {/* Hidden URL input/Preview */}
+                        <div className="mt-2">
+                            <input
+                                type="url"
+                                name="featured_image"
+                                value={formData.featured_image}
+                                onChange={handleChange}
+                                className="w-full px-3 py-2 text-xs border border-gray-100 rounded bg-gray-50 text-gray-500"
+                                placeholder="Image URL (auto-filled on upload)"
+                                readOnly={uploading}
+                            />
+                        </div>
+                        {formData.featured_image && (
+                            <div className="mt-2 rounded-lg overflow-hidden border border-gray-200 bg-gray-50 w-full aspect-video relative">
+                                <img src={formData.featured_image} alt="Preview" className="w-full h-full object-cover" />
+                            </div>
+                        )}
                     </div>
 
                     {/* Status */}
@@ -195,7 +281,7 @@ export default function NewBlogPage() {
                 <div className="flex justify-end pt-4">
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || uploading}
                         className="bg-slate-900 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? 'Creating...' : 'Create Blog Post'}
