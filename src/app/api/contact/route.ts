@@ -20,7 +20,7 @@ export async function POST(req: Request) {
             const { sendWhatsAppMessage } = await import('@/lib/whatsapp');
 
             // 1. Notify Admin
-            const adminPhone = '919871881183'; // Updated with User provided number
+            const adminPhone = process.env.ADMIN_PHONE;
             if (adminPhone) {
                 await sendWhatsAppMessage(adminPhone, 'new_lead_alert', [
                     { type: 'text', text: name },

@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || '587'),
     secure: process.env.SMTP_PORT === '465', // true for 465, false for other ports
     auth: {
@@ -55,5 +55,14 @@ export const emailTemplates = {
     <p>The SiteBoard Team</p>
     <br/>
     <small>Powered by Aiclex Technologies</small>
+  `,
+    resetPassword: (link: string) => `
+    <h2>Password Reset Request</h2>
+    <p>You requested a password reset for your SiteBoard account.</p>
+    <p>Click the link below to reset your password. This link is valid for 1 hour.</p>
+    <p><a href="${link}">${link}</a></p>
+    <p>If you didn't request this, please ignore this email.</p>
+    <br/>
+    <small>SiteBoard Team</small>
   `
 };

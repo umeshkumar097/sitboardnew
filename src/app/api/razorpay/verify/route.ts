@@ -83,7 +83,7 @@ export async function POST(req: Request) {
         (async () => {
             try {
                 const { sendWhatsAppMessage } = await import('@/lib/whatsapp');
-                const adminPhone = '919871881183'; // Updated with User provided number
+                const adminPhone = process.env.ADMIN_PHONE;
                 if (adminPhone && companyId) {
                     await sendWhatsAppMessage(adminPhone, 'payment_received', [
                         { type: 'text', text: plan.name },
