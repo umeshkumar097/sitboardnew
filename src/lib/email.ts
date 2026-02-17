@@ -18,8 +18,10 @@ interface EmailOptions {
 
 export async function sendEmail({ to, subject, html }: EmailOptions) {
   try {
+    // Force FROM to match SMTP_USER to avoid 553 5.7.1 errors
+    const fromAddress = process.env.SMTP_USER || 'info@siteboard.in';
     const info = await transporter.sendMail({
-      from: process.env.FROM_EMAIL || '"SiteBoard" <info@siteboard.in>',
+      from: `"SiteBoard" <${fromAddress}>`,
       to,
       subject,
       html,

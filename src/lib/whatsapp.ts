@@ -27,7 +27,7 @@ export async function sendWhatsAppMessage(to: string, templateName: string, comp
                     language: {
                         code: 'en_US',
                     },
-                    components: components.length > 0 && !components[0].type ? [{
+                    components: (components.length > 0 && ['text', 'currency', 'date_time', 'image', 'document', 'video'].includes(components[0].type)) ? [{
                         type: 'body',
                         parameters: components
                     }] : components
