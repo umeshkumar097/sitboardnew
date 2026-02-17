@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
+import BlogEnquiryForm from '@/components/BlogEnquiryForm';
 
 // Helper to get blog data
 async function getBlog(slug: string) {
@@ -110,6 +111,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         className="prose prose-lg prose-slate prose-headings:font-bold prose-a:text-blue-600 hover:prose-a:text-blue-500 mx-auto"
                         dangerouslySetInnerHTML={{ __html: blog.content }}
                     />
+
+                    <BlogEnquiryForm blogTitle={blog.title} />
 
                     <div className="mt-12 pt-8 border-t border-slate-100">
                         <Link href="/blog" className="text-blue-600 font-medium hover:underline flex items-center">
