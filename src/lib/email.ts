@@ -1,39 +1,39 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_PORT === '465', // true for 465, false for other ports
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
+  host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT || '587'),
+  secure: process.env.SMTP_PORT === '465', // true for 465, false for other ports
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
 });
 
 interface EmailOptions {
-    to: string;
-    subject: string;
-    html: string;
+  to: string;
+  subject: string;
+  html: string;
 }
 
 export async function sendEmail({ to, subject, html }: EmailOptions) {
-    try {
-        const info = await transporter.sendMail({
-            from: process.env.FROM_EMAIL || '"SiteBoard" <noreply@siteboard.in>',
-            to,
-            subject,
-            html,
-        });
-        console.log(`Email sent: ${info.messageId}`);
-        return { success: true, messageId: info.messageId };
-    } catch (error) {
-        console.error('Error sending email:', error);
-        return { success: false, error };
-    }
+  try {
+    const info = await transporter.sendMail({
+      from: process.env.FROM_EMAIL || '"SiteBoard" <info@siteboard.in>',
+      to,
+      subject,
+      html,
+    });
+    console.log(`Email sent: ${info.messageId}`);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('Error sending email:', error);
+    return { success: false, error };
+  }
 }
 
 export const emailTemplates = {
-    newLeadAdmin: (lead: any) => `
+  newLeadAdmin: (lead: any) => `
     <h2>New Lead Received on SiteBoard</h2>
     <p>You have a receiver a new lead submission:</p>
     <ul>
@@ -45,7 +45,7 @@ export const emailTemplates = {
     </ul>
     <p><a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/admin">View in Admin Panel</a></p>
   `,
-    launchAnnouncement: (lead: any) => `
+  launchAnnouncement: (lead: any) => `
     <h2>SiteBoard is Live 🚀</h2>
     <p>Hi ${lead.name},</p>
     <p>We’re excited to inform you that SiteBoard is now live.</p>
@@ -56,7 +56,7 @@ export const emailTemplates = {
     <br/>
     <small>Powered by Aiclex Technologies</small>
   `,
-    resetPassword: (link: string) => `
+  resetPassword: (link: string) => `
     <h2>Password Reset Request</h2>
     <p>You requested a password reset for your SiteBoard account.</p>
     <p>Click the link below to reset your password. This link is valid for 1 hour.</p>

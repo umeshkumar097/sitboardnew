@@ -27,7 +27,10 @@ export async function sendWhatsAppMessage(to: string, templateName: string, comp
                     language: {
                         code: 'en_US',
                     },
-                    components: components
+                    components: components.length > 0 && !components[0].type ? [{
+                        type: 'body',
+                        parameters: components
+                    }] : components
                 },
             }),
         });
