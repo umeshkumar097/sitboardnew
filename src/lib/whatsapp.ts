@@ -5,6 +5,12 @@ const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
 
 export async function sendWhatsAppMessage(to: string, templateName: string, components: any[] = []) {
     console.log(`Sending WhatsApp attempt. To: ${to}, Template: ${templateName}, PhoneID: ${WHATSAPP_PHONE_ID ? 'Set' : 'Missing'}, Token: ${WHATSAPP_TOKEN ? 'Set' : 'Missing'}`);
+
+    if (!WHATSAPP_PHONE_ID || !WHATSAPP_TOKEN) {
+        console.error('WhatsApp Error: Missing WHATSAPP_PHONE_ID or WHATSAPP_TOKEN in environment variables.');
+        return { success: false, error: 'Missing Credentials' };
+    }
+
     try {
         const response = await fetch(`https://graph.facebook.com/v17.0/${WHATSAPP_PHONE_ID}/messages`, {
             method: 'POST',

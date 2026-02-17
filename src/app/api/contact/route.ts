@@ -6,6 +6,14 @@ export async function POST(req: Request) {
         const { name, phone, email, message, company_name, plan_interest } = await req.json();
         console.log('Contact API hit:', { name, phone, email });
 
+        // Debug: Check loaded config
+        console.log('Config Status:', {
+            HAS_DB_URL: !!process.env.DATABASE_URL,
+            HAS_ADMIN_PHONE: !!process.env.ADMIN_PHONE,
+            HAS_SMTP_HOST: !!process.env.SMTP_HOST,
+            HAS_WA_ID: !!process.env.WHATSAPP_PHONE_ID
+        });
+
         if (!name || !phone) {
             console.log('Missing name or phone');
             return NextResponse.json({ error: 'Name and Phone are required' }, { status: 400 });
