@@ -1,138 +1,173 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
+import pool from '@/lib/db';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import BlogSidebar from '@/components/BlogSidebar';
 
 export const metadata: Metadata = {
-    title: 'Blog - SiteBoard',
-    description: 'Latest news, updates, and insights from SiteBoard.',
+    title: 'Real Estate Developer Insights | SiteBoard Blog',
+    description: 'Expert tips, market trends, and strategies for real estate developers and channel partners in India.',
 };
 
-async function getBlogs() {
-    // In a server component, we can call the DB directly or fetch from API. 
-    // Fetching from API (absolute URL needed) or DB directly is fine. 
-    // Let's use the API route we created, but we need full URL. 
-    // Actually, for Server Components, direct DB access is often cleaner if we want to avoid full URL issues, 
-    // but we already made an API. Let's try to use the API if we can, or validly use DB code.
-    // Given we are in the same app, let's just re-use the DB logic or import the GET function? 
-    // Importing GET function is tricky with NextRequest types. 
-    // Let's use direct DB query here for simplicity and performance in Server Component.
-
-    const { Pool } = require('pg');
-    const pool = new Pool({
-        connectionString: process.env.DATABASE_URL,
-        ssl: { rejectUnauthorized: false }
-    });
-
+async function getBlogs(search?: string, category?: string) {
     const client = await pool.connect();
     try {
-        const res = await client.query(`
-            SELECT id, title, slug, excerpt, featured_image, published_at, views 
-            FROM blogs 
+        let query = `
+            SELECT * FROM blogs 
             WHERE published = true 
-            ORDER BY published_at DESC
-        `);
-        return res.rows;
-    } finally {
-        client.release();
-        // Don't end pool as it might be shared? actually new Pool here is bad practice if repeated.
-        // We should import the singleton pool from @/lib/db
-        // But @/lib/db uses 'pg' import which is fine.
-    }
-}
+        `;
+        const values: any[] = [];
+        let paramCount = 1;
 
-// Better way: Import pool from lib
-import pool from '@/lib/db';
+        if (search) {
+            query += ` AND (title ILIKE $${paramCount} OR content ILIKE $${paramCount})`;
+            values.push(`%${search}%`);
+            paramCount++;
+        }
 
-async function getBlogsSafe() {
-    const client = await pool.connect();
-    try {
-        const res = await client.query(`
-            SELECT id, title, slug, excerpt, featured_image, published_at, views 
-            FROM blogs 
-            WHERE published = true 
-            ORDER BY published_at DESC
-        `);
-        return res.rows;
-    } catch (e) {
-        console.error(e);
-        return [];
+        if (category) {
+            query += ` AND category = $${paramCount}`;
+            values.push(category);
+            paramCount++;
+        }
+
+        query += ` ORDER BY published_at DESC`;
+
+        const result = await client.query(query, values);
+        return result.rows;
     } finally {
         client.release();
     }
 }
 
-export default async function BlogParams() {
-    const blogs = await getBlogsSafe();
+export default async function BlogPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+    const resolvedSearchParams = await searchParams;
+    const search = typeof resolvedSearchParams.search === 'string' ? resolvedSearchParams.search : undefined;
+    const category = typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : undefined;
+
+    const blogs = await getBlogs(search, category);
 
     return (
-        <div className="min-h-screen bg-white">
-            {/* Header / Nav placeholder - Assuming Main Layout handles generic Nav, but if this is a public page 
-                outside dashboard layout, it might need its own Nav. 
-                For now, let's just make the content area. 
-             */}
+        <main className="min-h-screen bg-slate-50 flex flex-col">
+            <Navbar />
 
-            <div className="bg-slate-50 border-b border-gray-100 py-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h1 className="text-4xl font-bold text-slate-900 tracking-tight sm:text-5xl">
-                        Our Blog
+            {/* Header */}
+            <section className="bg-slate-900 text-white py-20">
+                <div className="container mx-auto px-4 text-center">
+                    <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                        {category ? `${category} Articles` : 'Real Estate Insights'}
                     </h1>
-                    <p className="mt-4 text-xl text-gray-500 max-w-2xl mx-auto">
-                        Latest updates, industry insights, and news from the SiteBoard team.
+                    <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+                        Strategies, trends, and technology for modern real estate developers.
                     </p>
                 </div>
-            </div>
+            </section>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                    {blogs.length > 0 ? (
-                        blogs.map((blog: any) => (
-                            <Link
-                                href={`/blog/${blog.slug}`}
-                                key={blog.id}
-                                className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300"
-                            >
-                                <div className="aspect-[16/9] w-full bg-gray-100 relative overflow-hidden">
-                                    {blog.featured_image ? (
-                                        <img
-                                            src={blog.featured_image}
-                                            alt={blog.title}
-                                            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                                        />
-                                    ) : (
-                                        <div className="flex items-center justify-center h-full text-gray-300">
-                                            <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 0 1 2.828 0L16 16m-2-2l1.586-1.586a2 2 0 0 1 2.828 0L20 14m-6-6h.01M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z" />
-                                            </svg>
+            <div className="container mx-auto px-4 py-12 flex-1">
+                <div className="flex flex-col lg:flex-row gap-12">
+                    {/* Main Content */}
+                    <div className="flex-1">
+                        {search && (
+                            <div className="mb-8 p-4 bg-white border rounded-lg flex items-center justify-between shadow-sm">
+                                <span className="text-slate-600">
+                                    Search results for: <strong>"{search}"</strong>
+                                </span>
+                                <Link href="/blog" className="text-blue-600 hover:underline text-sm font-medium">
+                                    Clear Search
+                                </Link>
+                            </div>
+                        )}
+
+                        {category && (
+                            <div className="mb-8 p-4 bg-white border rounded-lg flex items-center justify-between shadow-sm">
+                                <span className="text-slate-600">
+                                    Showing posts in: <strong>"{category}"</strong>
+                                </span>
+                                <Link href="/blog" className="text-blue-600 hover:underline text-sm font-medium">
+                                    Show All Posts
+                                </Link>
+                            </div>
+                        )}
+
+                        {blogs.length > 0 ? (
+                            <div className="grid md:grid-cols-2 gap-8">
+                                {blogs.map((blog: any) => (
+                                    <Link
+                                        href={`/blog/${blog.slug}`}
+                                        key={blog.id}
+                                        className="group bg-white rounded-xl overflow-hidden border border-slate-200 hover:shadow-lg transition-all duration-200 flex flex-col h-full"
+                                    >
+                                        <div className="aspect-video bg-slate-100 relative overflow-hidden">
+                                            {blog.featured_image ? (
+                                                <img
+                                                    src={blog.featured_image}
+                                                    alt={blog.title}
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-4xl bg-slate-100 text-slate-300">
+                                                    📰
+                                                </div>
+                                            )}
+                                            {blog.category && (
+                                                <span className="absolute top-4 left-4 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-sm">
+                                                    {blog.category}
+                                                </span>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                                <div className="p-6 flex-1 flex flex-col">
-                                    <div className="flex items-center text-xs text-gray-500 mb-3 space-x-2">
-                                        <span>{new Date(blog.published_at).toLocaleDateString()}</span>
-                                        <span>•</span>
-                                        <span>{blog.views} views</span>
-                                    </div>
-                                    <h2 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">
-                                        {blog.title}
-                                    </h2>
-                                    <p className="text-gray-600 text-sm line-clamp-3 mb-4 flex-1">
-                                        {blog.excerpt || blog.content?.substring(0, 150) + "..."}
-                                    </p>
-                                    <span className="text-blue-600 font-medium text-sm mt-auto inline-flex items-center group-hover:translate-x-1 transition-transform">
-                                        Read more
-                                        <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                        </svg>
-                                    </span>
-                                </div>
-                            </Link>
-                        ))
-                    ) : (
-                        <div className="col-span-full text-center py-20 text-gray-500">
-                            No blog posts found. Check back later!
-                        </div>
-                    )}
+                                        <div className="p-6 flex flex-col flex-1">
+                                            <div className="text-xs text-slate-500 mb-3 flex items-center gap-2 uppercase tracking-wide font-medium">
+                                                <span>{new Date(blog.published_at).toLocaleDateString()}</span>
+                                                {blog.author_name && (
+                                                    <>
+                                                        <span>•</span>
+                                                        <span>{blog.author_name}</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                            <h2 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                                {blog.title}
+                                            </h2>
+                                            <p className="text-slate-600 text-sm leading-relaxed mb-4 line-clamp-3 flex-1">
+                                                {blog.excerpt}
+                                            </p>
+                                            <div className="mt-auto pt-4 border-t border-slate-100 flex items-center text-blue-600 font-semibold text-sm">
+                                                Read Article
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-20 bg-white rounded-xl border border-dashed border-slate-300">
+                                <div className="text-6xl mb-4">🔍</div>
+                                <h3 className="text-xl font-bold text-slate-900 mb-2">No articles found</h3>
+                                <p className="text-slate-500 mb-6">
+                                    We couldn't find any articles matching your search.
+                                </p>
+                                <Link href="/blog" className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors inline-block">
+                                    View All Articles
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Sidebar */}
+                    <div className="flex-none lg:w-80">
+                        <BlogSidebar />
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <Footer />
+        </main>
     );
 }

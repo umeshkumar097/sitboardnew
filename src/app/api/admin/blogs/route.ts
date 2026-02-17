@@ -26,7 +26,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { title, slug, content, excerpt, featured_image, meta_title, meta_description, published } = await req.json();
+    const { title, slug, content, excerpt, featured_image, category, meta_title, meta_description, published } = await req.json();
 
     if (!title || !slug || !content) {
         return NextResponse.json({ error: 'Title, Slug, and Content are required' }, { status: 400 });
@@ -35,10 +35,10 @@ export async function POST(req: Request) {
     const client = await pool.connect();
     try {
         const result = await client.query(
-            `INSERT INTO blogs (title, slug, content, excerpt, featured_image, meta_title, meta_description, published, author_id, published_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CASE WHEN $8 = true THEN NOW() ELSE NULL END, NOW())
+            `INSERT INTO blogs (title, slug, content, excerpt, featured_image, category, meta_title, meta_description, published, author_id, published_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CASE WHEN $9 = true THEN NOW() ELSE NULL END, NOW())
              RETURNING *`,
-            [title, slug, content, excerpt, featured_image, meta_title, meta_description, published || false, session.id]
+            [title, slug, content, excerpt, featured_image, category || 'General', meta_title, meta_description, published || false, session.id]
         );
         return NextResponse.json(result.rows[0], { status: 201 });
     } catch (error: any) {

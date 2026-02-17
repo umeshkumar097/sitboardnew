@@ -1,33 +1,55 @@
-"use client";
+'use client';
 
 import { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import 'react-quill-new/dist/quill.snow.css';
 
 // Dynamic import for ReactQuill to avoid SSR issues
-const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
+const ReactQuill = dynamic(
+    async () => {
+        const { default: RQ } = await import('react-quill-new');
+        return function Comp({ forwardedRef, ...props }: any) {
+            return <RQ ref={forwardedRef} {...props} />;
+        };
+    },
+    { ssr: false }
+);
+
+const CATEGORIES = [
+    'General',
+    'Real Estate Tips',
+    'Market Updates',
+    'Project Launches',
+    'Technology',
+    'Vastu'
+];
 
 export default function NewBlogPage() {
     const router = useRouter();
-    const [loading, setLoading] = useState(false);
-    const [uploading, setUploading] = useState(false);
-
-    // Form state
     const [formData, setFormData] = useState({
         title: '',
         slug: '',
-        content: '',
         excerpt: '',
+        content: '',
         featured_image: '',
+        category: 'General',
         meta_title: '',
         meta_description: '',
-        published: false
+        author_name: 'Admin',
+        published_at: new Date().toISOString().split('T')[0],
+        published: true
     });
+
+    const [isUploading, setIsUploading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
     };
 
     const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,13 +57,15 @@ export default function NewBlogPage() {
         setFormData(prev => ({ ...prev, [name]: checked }));
     };
 
-    const handleContentChange = (value: string) => {
-        setFormData(prev => ({ ...prev, content: value }));
+    const handleContentChange = (content: string) => {
+        setFormData(prev => ({
+            ...prev,
+            content
+        }));
     };
 
-    // Auto-generate slug from title
     const handleTitleBlur = () => {
-        if (!formData.slug && formData.title) {
+        if (!formData.slug) {
             const slug = formData.title
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, '-')
@@ -50,92 +74,78 @@ export default function NewBlogPage() {
         }
     };
 
-    // Image Upload Handler
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!e.target.files?.[0]) return;
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
 
         const file = e.target.files[0];
-        setUploading(true);
+        setIsUploading(true);
 
         try {
-            const response = await fetch(
-                `/api/upload?filename=${encodeURIComponent(file.name)}`,
-                {
-                    method: 'POST',
-                    body: file,
-                },
-            );
+            const response = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+                method: 'POST',
+                body: file
+            });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Upload failed');
-            }
+            if (!response.ok) throw new Error('Upload failed');
 
-            const newBlob = await response.json();
-            setFormData(prev => ({ ...prev, featured_image: newBlob.url }));
+            const blob = await response.json();
+            setFormData(prev => ({ ...prev, featured_image: blob.url }));
         } catch (error) {
-            console.error('Upload Error:', error);
+            console.error('Error uploading file:', error);
             alert('Failed to upload image. Checks logs or ensure BLOB_READ_WRITE_TOKEN is set.');
         } finally {
-            setUploading(false);
+            setIsUploading(false);
         }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
+        setIsSubmitting(true);
 
         try {
-            // Basic validation
-            if (!formData.title || !formData.slug || !formData.content) {
-                alert('Please fill in all required fields (Title, Slug, Content)');
-                setLoading(false);
-                return;
-            }
-
-            const res = await fetch('/api/admin/blogs', {
+            const response = await fetch('/api/admin/blogs', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify(formData),
             });
 
-            if (res.ok) {
+            if (response.ok) {
                 router.push('/dashboard/admin/blogs');
                 router.refresh();
             } else {
-                const error = await res.json();
-                alert(error.error || 'Failed to create blog');
+                const error = await response.json();
+                alert(error.error || 'Failed to create blog post');
             }
         } catch (error) {
             console.error('Error creating blog:', error);
-            alert('An unexpected error occurred');
+            alert('An error occurred');
         } finally {
-            setLoading(false);
+            setIsSubmitting(false);
         }
     };
 
     const modules = useMemo(() => ({
         toolbar: [
-            [{ header: [1, 2, 3, false] }],
+            [{ 'header': [1, 2, 3, false] }],
             ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-            [{ list: 'ordered' }, { list: 'bullet' }],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
             ['link', 'image'],
-            ['clean'],
+            ['clean']
         ],
     }), []);
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6 pb-20">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-slate-800">Create New Blog</h1>
+        <div className="max-w-4xl mx-auto py-8 px-4">
+            <div className="flex items-center justify-between mb-6">
+                <h1 className="text-2xl font-bold text-slate-800">Create New Blog Post</h1>
             </div>
 
-            <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-6">
-
+            <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow border border-gray-100">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Title */}
                     <div className="space-y-1">
-                        <label className="text-sm font-medium text-slate-700">Title <span className="text-red-500">*</span></label>
+                        <label className="block text-sm font-medium text-gray-700">Title <span className="text-red-500">*</span></label>
                         <input
                             type="text"
                             name="title"
@@ -143,115 +153,122 @@ export default function NewBlogPage() {
                             onChange={handleChange}
                             onBlur={handleTitleBlur}
                             required
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900"
+                            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Enter blog title"
                         />
                     </div>
 
-                    {/* Slug */}
                     <div className="space-y-1">
-                        <label className="text-sm font-medium text-slate-700">Slug <span className="text-red-500">*</span></label>
+                        <label className="block text-sm font-medium text-gray-700">Slug <span className="text-red-500">*</span></label>
                         <input
                             type="text"
                             name="slug"
                             value={formData.slug}
                             onChange={handleChange}
                             required
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 font-mono text-sm"
-                            placeholder="my-blog-post-slug"
+                            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                            placeholder="url-friendly-slug"
                         />
                     </div>
                 </div>
 
-                {/* Content - ReactQuill */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium text-gray-700">Category</label>
+                        <select
+                            name="category"
+                            value={formData.category}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            {CATEGORIES.map(cat => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium text-gray-700">Author</label>
+                        <input
+                            type="text"
+                            name="author_name"
+                            value={formData.author_name}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+                </div>
+
                 <div className="space-y-1">
-                    <label className="text-sm font-medium text-slate-700">Content <span className="text-red-500">*</span></label>
-                    <div className="prose-editor">
+                    <label className="block text-sm font-medium text-gray-700">Excerpt <span className="text-red-500">*</span></label>
+                    <textarea
+                        name="excerpt"
+                        value={formData.excerpt}
+                        onChange={handleChange}
+                        required
+                        rows={3}
+                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Short summary for preview cards..."
+                    />
+                </div>
+
+                <div className="space-y-1">
+                    <label className="block text-sm font-medium text-gray-700">Content <span className="text-red-500">*</span></label>
+                    <div className="h-96 mb-12">
                         <ReactQuill
                             theme="snow"
                             value={formData.content}
                             onChange={handleContentChange}
                             modules={modules}
-                            className="h-64 mb-12"
+                            className="h-full"
                         />
                     </div>
                 </div>
 
-                {/* Excerpt */}
-                <div className="space-y-1">
-                    <label className="text-sm font-medium text-slate-700">Excerpt / Short Description</label>
-                    <textarea
-                        name="excerpt"
-                        value={formData.excerpt}
-                        onChange={handleChange}
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900"
-                        placeholder="Brief summary for listings..."
-                    />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Featured Image - Upload */}
-                    <div className="space-y-1">
-                        <label className="text-sm font-medium text-slate-700">Featured Image</label>
-
-                        <div className="flex gap-4 items-start">
-                            <div className="flex-1">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                    disabled={uploading}
-                                    className="block w-full text-sm text-slate-500
-                                      file:mr-4 file:py-2 file:px-4
-                                      file:rounded-full file:border-0
-                                      file:text-sm file:font-semibold
-                                      file:bg-slate-50 file:text-slate-700
-                                      hover:file:bg-slate-100
-                                    "
-                                />
-                                {uploading && <p className="text-xs text-blue-500 mt-1">Uploading...</p>}
-                            </div>
-                        </div>
-
-                        {/* Hidden URL input/Preview */}
-                        <div className="mt-2">
+                <div className="space-y-1 pt-8">
+                    <label className="block text-sm font-medium text-gray-700">Featured Image</label>
+                    <div className="flex items-center gap-4">
+                        <div className="flex-1">
                             <input
-                                type="url"
-                                name="featured_image"
-                                value={formData.featured_image}
-                                onChange={handleChange}
-                                className="w-full px-3 py-2 text-xs border border-gray-100 rounded bg-gray-50 text-gray-500"
-                                placeholder="Image URL (auto-filled on upload)"
-                                readOnly={uploading}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileUpload}
+                                className="block w-full text-sm text-slate-500
+                                  file:mr-4 file:py-2 file:px-4
+                                  file:rounded-full file:border-0
+                                  file:text-sm file:font-semibold
+                                  file:bg-blue-50 file:text-blue-700
+                                  hover:file:bg-blue-100"
+                                disabled={isUploading}
                             />
+                            {isUploading && <span className="text-sm text-blue-600 mt-1">Uploading...</span>}
                         </div>
-                        {formData.featured_image && (
-                            <div className="mt-2 rounded-lg overflow-hidden border border-gray-200 bg-gray-50 w-full aspect-video relative">
-                                <img src={formData.featured_image} alt="Preview" className="w-full h-full object-cover" />
-                            </div>
-                        )}
                     </div>
 
-                    {/* Status */}
-                    <div className="flex items-end pb-3">
-                        <label className="flex items-center space-x-3 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                name="published"
-                                checked={formData.published}
-                                onChange={handleCheckboxChange}
-                                className="w-5 h-5 text-slate-900 rounded border-gray-300 focus:ring-slate-900"
-                            />
-                            <span className="text-sm font-medium text-slate-700">Publish Immediately</span>
-                        </label>
+                    {/* Hidden URL input for manual override if needed */}
+                    <div className="mt-2">
+                        <input
+                            type="url"
+                            name="featured_image"
+                            value={formData.featured_image}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 text-xs border border-gray-100 rounded bg-gray-50 text-gray-500"
+                            placeholder="Image URL (auto-filled on upload)"
+                            readOnly={isUploading}
+                        />
                     </div>
+
+                    {formData.featured_image && (
+                        <div className="mt-2 relative w-full h-64 bg-gray-100 rounded overflow-hidden border">
+                            <img src={formData.featured_image} alt="Preview" className="w-full h-full object-cover" />
+                        </div>
+                    )}
                 </div>
 
                 <div className="pt-4 border-t border-gray-100">
-                    <h2 className="text-lg font-semibold text-slate-800 mb-4">SEO Settings</h2>
+                    <h2 className="text-lg font-semibold text-slate-800 mb-4">SEO & Publishing</h2>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                         <div className="space-y-1">
                             <label className="text-sm font-medium text-slate-700">Meta Title</label>
                             <input
@@ -259,32 +276,50 @@ export default function NewBlogPage() {
                                 name="meta_title"
                                 value={formData.meta_title}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900"
-                                placeholder="SEO optimized title"
+                                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="SEO Title"
                             />
                         </div>
-
                         <div className="space-y-1">
                             <label className="text-sm font-medium text-slate-700">Meta Description</label>
-                            <textarea
+                            <input
+                                type="text"
                                 name="meta_description"
                                 value={formData.meta_description}
                                 onChange={handleChange}
-                                rows={3}
-                                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900"
-                                placeholder="SEO description (150-160 chars recommended)"
+                                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="SEO Description"
                             />
                         </div>
                     </div>
+
+                    <div className="flex items-center space-x-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            name="published"
+                            checked={formData.published}
+                            onChange={handleCheckboxChange}
+                            className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                            id="published"
+                        />
+                        <label htmlFor="published" className="text-sm font-medium text-slate-700 cursor-pointer">Publish Immediately</label>
+                    </div>
                 </div>
 
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-end gap-3 pt-4 border-t">
+                    <button
+                        type="button"
+                        onClick={() => router.back()}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                    >
+                        Cancel
+                    </button>
                     <button
                         type="submit"
-                        disabled={loading || uploading}
-                        className="bg-slate-900 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isSubmitting || isUploading}
+                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                     >
-                        {loading ? 'Creating...' : 'Create Blog Post'}
+                        {isSubmitting ? 'Saving...' : 'Create Blog Post'}
                     </button>
                 </div>
             </form>
