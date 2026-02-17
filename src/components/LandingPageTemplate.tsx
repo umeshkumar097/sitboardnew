@@ -22,6 +22,7 @@ interface LandingPageProps {
     benefits?: string[];
     ctaText?: string;
     faqs?: SeoFaq[];
+    blogs?: any[]; // specific type should be defined but any is ok for now if interface not available
 }
 
 export default function LandingPageTemplate({
@@ -31,7 +32,8 @@ export default function LandingPageTemplate({
     features,
     benefits,
     ctaText = 'Get Early Access',
-    faqs
+    faqs,
+    blogs
 }: LandingPageProps) {
     return (
         <main style={{ overflowX: 'hidden' }}>
@@ -440,6 +442,49 @@ export default function LandingPageTemplate({
                     </div>
                 </div>
             </section>
+
+            {/* Latest Blogs Section */}
+            {blogs && blogs.length > 0 && (
+                <section style={{ padding: '6rem 0', background: 'white' }}>
+                    <div className="container">
+                        <h2 style={{ fontSize: '2.5rem', marginBottom: '3rem', textAlign: 'center' }}>Latest Updates</h2>
+                        <div className="grid-3" style={{ gap: '2rem' }}>
+                            {blogs.map((blog: any) => (
+                                <Link href={`/blog/${blog.slug}`} key={blog.id} style={{ textDecoration: 'none', color: 'inherit' }} className="group">
+                                    <div style={{ background: 'white', borderRadius: '1rem', overflow: 'hidden', border: '1px solid #e2e8f0', height: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+                                        <div style={{ aspectRatio: '16/9', background: '#f1f5f9', overflow: 'hidden' }}>
+                                            {blog.featured_image ? (
+                                                <img src={blog.featured_image} alt={blog.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            ) : (
+                                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#cbd5e1' }}>
+                                                    📰
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                            <div style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '0.5rem' }}>
+                                                {new Date(blog.published_at).toLocaleDateString()}
+                                            </div>
+                                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.75rem', lineHeight: 1.4 }}>{blog.title}</h3>
+                                            <p style={{ color: '#475569', fontSize: '0.95rem', lineHeight: 1.6, flex: 1 }}>
+                                                {blog.excerpt || 'Read more...'}
+                                            </p>
+                                            <div style={{ marginTop: '1.5rem', color: '#2563eb', fontWeight: 600, fontSize: '0.9rem' }}>
+                                                Read Article →
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                        <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+                            <Link href="/blog" className="btn btn-secondary">
+                                View All Articles
+                            </Link>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* Pricing Section */}
             <PricingSection />
