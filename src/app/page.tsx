@@ -11,29 +11,10 @@ export const metadata: Metadata = {
   keywords: 'real estate crm software, real estate software, real estate erp software india, real estate management software, real estate software development, best real estate management software, best real estate crm software in india, real estate plot managment',
 };
 
-import pool from '@/lib/db';
-
-async function getLatestBlogs() {
-  const client = await pool.connect();
-  try {
-    const res = await client.query(`
-      SELECT id, title, slug, excerpt, featured_image, published_at 
-      FROM blogs 
-      WHERE published = true 
-      ORDER BY published_at DESC 
-      LIMIT 3
-    `);
-    return res.rows;
-  } catch (error) {
-    console.error('Error fetching latest blogs:', error);
-    return [];
-  } finally {
-    client.release();
-  }
-}
+import pool, { getLatestBlogs } from '@/lib/db';
 
 export default async function Home() {
-  const blogs = await getLatestBlogs();
+  const blogs = await getLatestBlogs(3);
 
   return (
     <LandingPageTemplate source="home" blogs={blogs} />
