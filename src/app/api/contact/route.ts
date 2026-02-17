@@ -4,8 +4,10 @@ import pool from '@/lib/db';
 export async function POST(req: Request) {
     try {
         const { name, phone, email, message, company_name, plan_interest } = await req.json();
+        console.log('Contact API hit:', { name, phone, email });
 
         if (!name || !phone) {
+            console.log('Missing name or phone');
             return NextResponse.json({ error: 'Name and Phone are required' }, { status: 400 });
         }
 
@@ -18,10 +20,12 @@ export async function POST(req: Request) {
                 [name, phone, email, message, company_name, plan_interest]
             );
             const { sendWhatsAppMessage } = await import('@/lib/whatsapp');
+            const { sendEmail, emailTemplates } = await import('@/lib/email');
 
-            // 1. Notify Admin
+            // 1. Notify Admin (WhatsApp + Email)
             const adminPhone = process.env.ADMIN_PHONE;
             if (adminPhone) {
+                console.log('Sending Admin WhatsApp to:', adminPhone);
                 await sendWhatsAppMessage(adminPhone, 'new_lead_alert', [
                     { type: 'text', text: name },
                     { type: 'text', text: phone },
@@ -29,18 +33,33 @@ export async function POST(req: Request) {
                 ]);
             }
 
-            // 2. Thank User
+            const adminEmail = process.env.ADMIN_EMAIL || 'info@siteboard.in';
+            console.log('Sending Admin Email to:', adminEmail);
+            await sendEmail({
+                to: adminEmail,
+                subject: `New Lead: ${name}`,
+                html: emailTemplates.newLeadAdmin({ name, phone, company_name, city: message, whatsapp: phone })
+            });
+
+            // 2. Notification to User (WhatsApp + Email)
             if (phone) {
-                // Formatting phone number to ensure it has country code if missing
-                // This is a naive check. WhatsApp requires full number with country code.
-                // Assuming input might be local.
                 const userPhone = phone.replace(/[^0-9]/g, '');
-                // If length is 10, assume India (+91)
                 const formattedPhone = userPhone.length === 10 ? `91${userPhone}` : userPhone;
 
-                await sendWhatsAppMessage(formattedPhone, 'enquiry_received', [
+                console.log('Sending User WhatsApp to:', formattedPhone);
+                const waRes = await sendWhatsAppMessage(formattedPhone, 'enquiry_received', [
                     { type: 'text', text: name }
                 ]);
+                console.log('User WhatsApp Result:', waRes);
+            }
+
+            if (email) {
+                console.log('Sending User Email to:', email);
+                await sendEmail({
+                    to: email,
+                    subject: 'Welcome to SiteBoard',
+                    html: emailTemplates.launchAnnouncement({ name })
+                });
             }
 
             return NextResponse.json({ success: true, id: res.rows[0].id });
