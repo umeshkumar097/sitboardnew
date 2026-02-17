@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 const WHATSAPP_PHONE_ID = process.env.WHATSAPP_PHONE_ID;
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
 
-export async function sendWhatsAppMessage(to: string, templateName: string, components: any[] = []) {
-    console.log(`Sending WhatsApp attempt. To: ${to}, Template: ${templateName}, PhoneID: ${WHATSAPP_PHONE_ID ? 'Set' : 'Missing'}, Token: ${WHATSAPP_TOKEN ? 'Set' : 'Missing'}`);
+export async function sendWhatsAppMessage(to: string, templateName: string, components: any[] = [], languageCode: string = 'en_US') {
+    console.log(`Sending WhatsApp attempt. To: ${to}, Template: ${templateName}, Lang: ${languageCode}, PhoneID: ${WHATSAPP_PHONE_ID ? 'Set' : 'Missing'}, Token: ${WHATSAPP_TOKEN ? 'Set' : 'Missing'}`);
 
     if (!WHATSAPP_PHONE_ID || !WHATSAPP_TOKEN) {
         console.error('WhatsApp Error: Missing WHATSAPP_PHONE_ID or WHATSAPP_TOKEN in environment variables.');
@@ -25,7 +25,7 @@ export async function sendWhatsAppMessage(to: string, templateName: string, comp
                 template: {
                     name: templateName,
                     language: {
-                        code: 'en_US',
+                        code: languageCode,
                     },
                     components: (components.length > 0 && ['text', 'currency', 'date_time', 'image', 'document', 'video'].includes(components[0].type)) ? [{
                         type: 'body',

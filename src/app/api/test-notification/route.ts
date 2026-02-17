@@ -34,19 +34,29 @@ export async function GET(req: Request) {
         }
 
         // 2. Test WhatsApp
-        if (config.ADMIN_PHONE) {
-            log(`Attempting WhatsApp to ${config.ADMIN_PHONE}...`);
-            const waRes = await sendWhatsAppMessage(config.ADMIN_PHONE, 'hello_world'); // Using standard template or any
-            // Actually, let's use 'new_lead_alert' but with dummy data to test the real template
-            // Or just try a simple one if 'hello_world' is not available.
-            // Let's rely on the response error to tell us if template invalid.
-            // Retrying with 'new_lead_alert' as we know that's our target.
+        const { searchParams } = new URL(req.url);
+        const template = searchParams.get('template') || 'new_lead_alert';
+        const lang = searchParams.get('lang') || 'en_US';
 
-            const waRes2 = await sendWhatsAppMessage(config.ADMIN_PHONE, 'new_lead_alert', [
+        if (config.ADMIN_PHONE) {
+            log(`Attempting WhatsApp to ${config.ADMIN_PHONE} with template '${template}' (${lang})...`);
+
+            // Only send new_lead_alert structure if it matches default, otherwise likely a different template 
+            // requiring different components. For testing generic templates, we might send empty components if not matched.
+
+            const components = template === 'new_lead_alert' ? [
                 { type: 'text', text: 'TEST_NAME' },
                 { type: 'text', text: 'TEST_PHONE' },
                 { type: 'text', text: 'TEST_PLAN' }
-            ]);
+            ] : []; // If user tests another template, send no params to avoid component mismatch errors,
+            // unless they are standard hello_world style.
+
+            // Re-import with the dynamic lang capability if needed, but for now assuming lib supports it?
+            // Wait, lib/whatsapp.ts hardcodes 'en_US'! I need to fix that too.
+            // Let's just update the import to use the updated lib function if I change it.
+            // Actually, I need to update lib/whatsapp.ts to accept lang first.
+
+            const waRes2 = await sendWhatsAppMessage(config.ADMIN_PHONE, template, components, lang);
             log('WhatsApp Result:', waRes2);
         } else {
             log('Skipping WhatsApp: No Admin Phone');
