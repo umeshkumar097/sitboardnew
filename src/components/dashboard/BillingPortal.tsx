@@ -96,7 +96,7 @@ export default function BillingPortal({ company, plans, gateways, invoices = [] 
 
             // 2. Open Modal
             const options = {
-                key: orderData.key,
+                key: orderData.key, // Now returning 'key' from backend
                 amount: orderData.amount,
                 currency: orderData.currency,
                 name: 'SiteBoard',
@@ -112,7 +112,6 @@ export default function BillingPortal({ company, plans, gateways, invoices = [] 
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_payment_id: response.razorpay_payment_id,
                                 razorpay_signature: response.razorpay_signature,
-                                companyId: company.id,
                                 planId: plan.id
                             })
                         });
@@ -128,12 +127,12 @@ export default function BillingPortal({ company, plans, gateways, invoices = [] 
                     }
                 },
                 prefill: {
-                    name: "", // Can fill from user session if passed
+                    name: "",
                     email: "",
                     contact: ""
                 },
                 theme: {
-                    color: "#0f172a" // Slate-900
+                    color: "#0f172a"
                 }
             };
 

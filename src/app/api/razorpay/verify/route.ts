@@ -1,80 +1,104 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import pool from '@/lib/db';
-import { activateSubscription } from '@/lib/subscription';
-import { getRazorpayClient } from '@/lib/razorpay'; // Just to ensure init/check?
+import { getSession } from '@/lib/auth';
 
-export async function POST(request: Request) {
-    const {
-        razorpay_order_id,
-        razorpay_payment_id,
-        razorpay_signature,
-        companyId,
-        planId
-    } = await request.json();
+export async function POST(req: Request) {
+    const session = await getSession();
+    if (!session || !session.company_id) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, planId } = await req.json();
 
     const client = await pool.connect();
+
     try {
-        // 1. Fetch Secret Key
-        const secretRes = await client.query("SELECT secret_key FROM payment_settings WHERE gateway_name = 'razorpay' AND is_enabled = true");
-        if (secretRes.rowCount === 0) {
-            return NextResponse.json({ error: 'Razorpay configuration not found' }, { status: 500 });
+        // 1. Get Razorpay Secret
+        const gatewayRes = await client.query(
+            "SELECT secret_key FROM payment_gateways WHERE name = 'razorpay' AND is_active = true"
+        );
+
+        if (gatewayRes.rowCount === 0) {
+            return NextResponse.json({ error: 'Razorpay is not enabled' }, { status: 400 });
         }
-        const secret = secretRes.rows[0].secret_key;
+        const razorpaySecret = gatewayRes.rows[0].secret_key;
 
         // 2. Verify Signature
-        const generated_signature = crypto
-            .createHmac('sha256', secret)
-            .update(razorpay_order_id + "|" + razorpay_payment_id)
-            .digest('hex');
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSignature = crypto
+            .createHmac("sha256", razorpaySecret)
+            .update(body.toString())
+            .digest("hex");
 
-        if (generated_signature === razorpay_signature) {
-            // Signature valid
-
-            // 3. Fetch Payment details to get actual amount?
-            // We can trust the planId passed from client IF we re-verify or if we fetch order/payment details from Razorpay to confirm amount.
-            // For robustness, let's fetch payment details using Razorpay SDK.
-
-            // Re-init client or simpler: we trust the planId creates subscription based on plan price in `activateSubscription`.
-            // But user could change planId in client call.
-            // However, `activateSubscription` takes `amount`. 
-            // We should fetch the amount paid from Razorpay.
-
-            // Let's use getRazorpayClient if we want to fetch payment.
-            // Or simpler: `activateSubscription` fetches Plan details anyway to set dates.
-            // The `amount` passed to `activateSubscription` is recorded in DB.
-            // Better to fetch payment details from Razorpay to ensure amount matches.
-
-            // For MVP: Let's assume order creation was correct and planId is valid.
-            // But let's pass the amount from Plan (fetched in activateSubscription) or fetch order details?
-            // We have `razorpay_order_id`. We could fetch order details.
-
-            // Let's just fetch the Plan price inside `activateSubscription`?
-            // `activateSubscription` takes `amount`.
-            // I'll fetch the Plan here to pass strict amount to `activateSubscription`, 
-            // OR `activateSubscription` assumes amount is what was paid.
-
-            // Let's fetch Plan here to be sure.
-            const planRes = await client.query('SELECT price, currency FROM subscription_plans WHERE id = $1', [planId]);
-            const plan = planRes.rows[0];
-            const amount = parseFloat(plan.price); // This is what SHOULD have been paid.
-
-            await activateSubscription({
-                companyId: parseInt(companyId),
-                planId: parseInt(planId),
-                gateway: 'razorpay',
-                transactionId: razorpay_payment_id,
-                amount: amount,
-                currency: plan.currency || 'USD'
-            });
-
-            return NextResponse.json({ success: true });
-        } else {
-            return NextResponse.json({ error: 'Invalid Signature' }, { status: 400 });
+        if (expectedSignature !== razorpay_signature) {
+            return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
         }
 
-    } catch (error: any) {
-        console.error('Payment Verification Error:', error);
+        // 3. Payment Verified - Proceed to Update Subscription
+        await client.query('BEGIN');
+
+        // Fetch Plan (again to be safe, or trust passed ID)
+        const planRes = await client.query('SELECT * FROM subscription_plans WHERE id = $1', [planId]);
+        if (planRes.rowCount === 0) throw new Error('Invalid Plan ID');
+        const plan = planRes.rows[0];
+
+        const startDate = new Date();
+        const endDate = new Date();
+
+        if (plan.duration === 'monthly') {
+            endDate.setMonth(endDate.getMonth() + 1);
+        } else if (plan.duration === 'yearly') {
+            endDate.setFullYear(endDate.getFullYear() + 1);
+        } else {
+            // Fallback
+            endDate.setMonth(endDate.getMonth() + 1);
+        }
+
+        // Update Company
+        await client.query(`
+            UPDATE companies 
+            SET 
+                plan = $1, 
+                subscription_status = 'active',
+                subscription_ends_at = $2,
+                updated_at = NOW()
+            WHERE id = $3
+        `, [plan.name.toLowerCase(), endDate, session.company_id]);
+
+        // Create Invoice
+        const invoiceNumber = `INV-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+        await client.query(`
+            INSERT INTO invoices (company_id, invoice_number, amount, plan_name, period_start, period_end, status)
+            VALUES ($1, $2, $3, $4, $5, $6, 'Paid')
+        `, [session.company_id, invoiceNumber, plan.price, plan.name, startDate, endDate]);
+
+        await client.query('COMMIT');
+
+        return NextResponse.json({ success: true });
+
+        // Send WhatsApp Notification (Async - don't block response)
+        const companyId = session?.company_id;
+        (async () => {
+            try {
+                const { sendWhatsAppMessage } = await import('@/lib/whatsapp');
+                const adminPhone = '919871881183'; // Updated with User provided number
+                if (adminPhone && companyId) {
+                    await sendWhatsAppMessage(adminPhone, 'payment_received', [
+                        { type: 'text', text: plan.name },
+                        { type: 'text', text: plan.price },
+                        { type: 'text', text: companyId.toString() }
+                    ]);
+                }
+            } catch (e) {
+                console.error('WhatsApp Notification Error:', e);
+            }
+        })();
+
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error('Error verifying Razorpay payment:', err);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     } finally {
         client.release();

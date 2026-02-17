@@ -76,7 +76,7 @@ export default async function UsersPage() {
                                     {new Date(user.created_at).toLocaleDateString()}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <a href="#" className="text-blue-600 hover:text-blue-900">Edit</a>
+                                    <Link href={`/dashboard/users/${user.id}`} className="text-blue-600 hover:text-blue-900">Edit</Link>
                                 </td>
                             </tr>
                         ))}

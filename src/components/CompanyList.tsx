@@ -13,6 +13,7 @@ export default function CompanyList({ initialCompanies }: { initialCompanies: an
 
     // Edit Form State
     const [editForm, setEditForm] = useState<{
+        name: string;
         plan: string;
         subscription_status: string;
         extend_trial_days: number;
@@ -21,6 +22,7 @@ export default function CompanyList({ initialCompanies }: { initialCompanies: an
         amount?: number;
         generateReceipt?: boolean;
     }>({
+        name: '',
         plan: 'trial',
         subscription_status: 'active',
         extend_trial_days: 0,
@@ -32,6 +34,7 @@ export default function CompanyList({ initialCompanies }: { initialCompanies: an
     const handleEditClick = (company: any) => {
         setSelectedCompany(company);
         setEditForm({
+            name: company.name || '',
             plan: company.plan || 'trial',
             subscription_status: company.subscription_status || 'active',
             extend_trial_days: 0,
@@ -47,21 +50,34 @@ export default function CompanyList({ initialCompanies }: { initialCompanies: an
         setLoading(true);
 
         try {
-            const res = await fetch(`/api/companies/${selectedCompany.id}/subscription`, {
+            // Update Subscription (PATCH) - We can keep using this for subscription details
+            const subRes = await fetch(`/api/companies/${selectedCompany.id}/subscription`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(editForm)
             });
 
-            if (res.ok) {
-                const updatedCompany = await res.json();
-                // Update local state
-                setCompanies(companies.map(c => c.id === selectedCompany.id ? { ...c, ...updatedCompany } : c));
+            // Update Name (PUT) - New endpoint we will create
+            const nameRes = await fetch(`/api/companies/${selectedCompany.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: editForm.name })
+            });
+
+            if (subRes.ok && nameRes.ok) {
+                const updatedSub = await subRes.json();
+                const updatedName = await nameRes.json();
+
+                // Update local state by merging responses
+                // actually the PUT might return full company object too? or just updated fields.
+                // Let's assume PUT returns { name: 'New Name' } or full object.
+
+                setCompanies(companies.map(c => c.id === selectedCompany.id ? { ...c, ...updatedSub, name: editForm.name } : c));
                 setShowEditModal(false);
                 setSelectedCompany(null);
                 router.refresh();
             } else {
-                alert('Failed to update subscription');
+                alert('Failed to update company');
             }
         } catch (err) {
             console.error(err);
@@ -145,6 +161,16 @@ export default function CompanyList({ initialCompanies }: { initialCompanies: an
                             <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
                         </div>
                         <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Company Name</label>
+                                <input
+                                    type="text"
+                                    className="w-full px-3 py-2 border rounded-lg"
+                                    value={editForm.name || ''}
+                                    onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                                />
+                            </div>
+
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Plan</label>
                                 <select

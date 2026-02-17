@@ -30,36 +30,37 @@ export default function Sidebar({ user, isOpen, setIsOpen }: { user: any, isOpen
 
     const navItems = [];
 
-    // Common items
+    // Common items (Everyone sees Dashboard)
     navItems.push({ name: 'Dashboard', href: '/dashboard', icon: Icons.Dashboard });
 
-    // Role specific
+    // Super Admin
     if (user.role === 'super_admin') {
         navItems.push({ name: 'Companies', href: '/dashboard/companies', icon: Icons.Briefcase });
         navItems.push({ name: 'Plans', href: '/dashboard/admin/plans', icon: Icons.Plans });
-        navItems.push({ name: 'Users', href: '/dashboard/users', icon: Icons.Users });
-        navItems.push({ name: 'Enquiries', href: '/dashboard/admin/enquiries', icon: Icons.Users }); // Using Users icon for now or similar
-        navItems.push({ name: 'Blogs', href: '/dashboard/admin/blogs', icon: Icons.Dashboard }); // Using Dashboard icon as placeholder for Blog
-    } else {
-        // Companies and Agents see Projects. Super Admins might not need direct project access or different view?
-        // Usually Super Admins manage Companies, Company Admins manage Projects.
-        if (user.role !== 'super_admin') {
-            navItems.push({ name: 'Projects', href: '/dashboard/projects', icon: Icons.Building });
-        }
+        navItems.push({ name: 'Users', href: '/dashboard/users', icon: Icons.Users }); // Global Users
+        navItems.push({ name: 'Enquiries', href: '/dashboard/admin/enquiries', icon: Icons.Users });
+        navItems.push({ name: 'Blogs', href: '/dashboard/admin/blogs', icon: Icons.Dashboard });
+        navItems.push({ name: 'Gateways', href: '/dashboard/admin/gateways', icon: Icons.Settings });
     }
 
+    // Company Admin
     if (user.role === 'company_admin') {
-        navItems.push({ name: 'Agents', href: '/dashboard/agents', icon: Icons.Users });
+        navItems.push({ name: 'Projects', href: '/dashboard/projects', icon: Icons.Building });
+        navItems.push({ name: 'Agents', href: '/dashboard/agents', icon: Icons.Users }); // Company Agents
         navItems.push({ name: 'Leads', href: '/dashboard/leads', icon: Icons.Users });
         navItems.push({ name: 'Billing', href: '/dashboard/billing', icon: Icons.Briefcase });
     }
 
+    // Agent
     if (user.role === 'agent') {
         navItems.push({ name: 'Leads', href: '/dashboard/leads', icon: Icons.Users });
+        // Agents might need Projects READ-ONLY, but for now strict restriction as per plan
     }
 
-    // Add Settings at the end
-    navItems.push({ name: 'Settings', href: '/dashboard/settings', icon: Icons.Settings });
+    // Settings (Super Admin & Company Admin ONLY)
+    if (user.role !== 'agent') {
+        navItems.push({ name: 'Settings', href: '/dashboard/settings', icon: Icons.Settings });
+    }
 
     return (
         <>

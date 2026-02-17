@@ -21,7 +21,7 @@ export default async function BillingPage() {
         const [companyRes, plansRes, gatewaysRes, invoicesRes] = await Promise.all([
             client.query('SELECT id, plan, subscription_status, subscription_ends_at FROM companies WHERE id = $1', [session.company_id]),
             client.query('SELECT * FROM subscription_plans WHERE is_active = true ORDER BY price ASC'),
-            client.query('SELECT gateway_name, public_key FROM payment_settings WHERE is_enabled = true'),
+            client.query('SELECT name as gateway_name, api_key as public_key FROM payment_gateways WHERE is_active = true'),
             client.query('SELECT * FROM invoices WHERE company_id = $1 ORDER BY created_at DESC LIMIT 10', [session.company_id])
         ]);
 

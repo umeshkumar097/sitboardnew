@@ -25,8 +25,45 @@ export async function middleware(request: NextRequest) {
     }
 
     // If on protected route and not logged in -> login
-    if (request.nextUrl.pathname.startsWith('/dashboard') && !session) {
-        return NextResponse.redirect(new URL('/login', request.url));
+    if (request.nextUrl.pathname.startsWith('/dashboard')) {
+        if (!session) {
+            return NextResponse.redirect(new URL('/login', request.url));
+        }
+
+        // Role-Based Access Control
+        const role = session.role;
+        const path = request.nextUrl.pathname;
+
+        // 1. Super Admin Only Routes
+        if (
+            (path.startsWith('/dashboard/companies') ||
+                path.startsWith('/dashboard/users') ||     // Global Users
+                path.startsWith('/dashboard/admin')) &&    // Admin specific
+            role !== 'super_admin'
+        ) {
+            return NextResponse.redirect(new URL('/dashboard', request.url));
+        }
+
+        // 2. Company Admin Only Routes (Agents should not see these)
+        if (
+            (path.startsWith('/dashboard/billing') ||
+                path.startsWith('/dashboard/agents') ||
+                path.startsWith('/dashboard/settings') ||
+                path.startsWith('/dashboard/projects')) && // Projects usually for Admin/Agent, but distinct
+            role === 'agent'
+        ) {
+            // Agents might need Projects read-only? For now blocking based on plan.
+            // If Agents need Projects, remove that check. 
+            // But based on Sidebar, Agents only see Leads.
+            return NextResponse.redirect(new URL('/dashboard', request.url));
+        }
+
+        // 3. Billing is strictly Company Admin (Super Admin doesn't pay, Agents don't pay)
+        // Actually Super Admin might want to debug billing but typically they manage companies.
+        // Let's keep it strict for now: Company Admin.
+        if (path.startsWith('/dashboard/billing') && role !== 'company_admin') {
+            return NextResponse.redirect(new URL('/dashboard', request.url));
+        }
     }
 
     // Legacy /admin route protection (optional, can be removed if not used)

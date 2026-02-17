@@ -17,6 +17,16 @@ export async function verifyPassword(password: string, storedHash: string): Prom
     });
 }
 
+export async function hashPassword(password: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const salt = crypto.randomBytes(16).toString('hex');
+        crypto.scrypt(password, salt, 64, (err, derivedKey) => {
+            if (err) reject(err);
+            resolve(`${salt}:${derivedKey.toString('hex')}`);
+        });
+    });
+}
+
 export async function getSession(): Promise<UserSession | null> {
     const cookieStore = await cookies();
     const token = cookieStore.get('session_token')?.value;

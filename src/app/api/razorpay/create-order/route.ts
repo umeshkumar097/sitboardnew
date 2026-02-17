@@ -1,77 +1,86 @@
 import { NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth';
-import { getRazorpayClient } from '@/lib/razorpay';
+import Razorpay from 'razorpay';
 import pool from '@/lib/db';
+import { getSession } from '@/lib/auth';
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
     const session = await getSession();
     if (!session || !session.company_id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { planId, currency } = await request.json();
-
-    const client = await pool.connect();
     try {
-        // 1. Fetch Plan
-        const planRes = await client.query('SELECT * FROM subscription_plans WHERE id = $1', [planId]);
-        if (planRes.rowCount === 0) {
-            return NextResponse.json({ error: 'Invalid Plan' }, { status: 400 });
-        }
-        const plan = planRes.rows[0];
+        const { planId } = await req.json();
 
-        // 2. Init Razorpay
-        const razorpay = await getRazorpayClient();
+        // 1. Get Razorpay Credentials & Plan Details
+        const client = await pool.connect();
+        let razorpayKey = null;
+        let razorpaySecret = null;
+        let plan = null;
+
+        try {
+            const gatewayRes = await client.query(
+                "SELECT api_key, secret_key FROM payment_gateways WHERE name = 'razorpay' AND is_active = true"
+            );
+
+            if (gatewayRes.rowCount === 0) {
+                return NextResponse.json({ error: 'Razorpay is not enabled' }, { status: 400 });
+            }
+
+            razorpayKey = gatewayRes.rows[0].api_key;
+            razorpaySecret = gatewayRes.rows[0].secret_key;
+
+            const planRes = await client.query('SELECT * FROM subscription_plans WHERE id = $1', [planId]);
+            if (planRes.rowCount === 0) {
+                return NextResponse.json({ error: 'Invalid Plan' }, { status: 400 });
+            }
+            plan = planRes.rows[0];
+
+        } finally {
+            client.release();
+        }
+
+        if (!razorpayKey || !razorpaySecret) {
+            return NextResponse.json({ error: 'Razorpay configuration incomplete' }, { status: 500 });
+        }
+
+        // 2. Initialize Razorpay
+        const razorpay = new Razorpay({
+            key_id: razorpayKey,
+            key_secret: razorpaySecret,
+        });
 
         // 3. Create Order
-        // Amount must be in subunits (paise)
-        // Convert plan price (USD?) to INR if needed?
-        // The plan has `currency` column. If USD, we might need conversion or just charge in USD if Razorpay supports it (international).
-        // For SiteBoard (Indian real estate), plan should ideally be in INR. 
-        // But `subscription_plans` defaults to 'USD'.
-        // If plan is USD, let's assume 1 USD = 83 INR roughly, or just use the price as is if currency is INR.
-        // User requested dynamic conversion component earlier.
-        // For robustness, let's assume plan currency is what we charge. Razorpay supports international.
-        // If currency is 'USD', amount is in cents? No, Razorpay expects smallest currency unit.
-        // USD -> cents. INR -> paise.
-
-        const currencyCode = (plan.currency || 'INR').toUpperCase();
-        let amount = parseFloat(plan.price);
-
-        if (currencyCode === 'INR') {
-            amount = Math.round(amount * 100); // paise
-        } else {
-            amount = Math.round(amount * 100); // cents for USD
-        }
+        // Amount is in smallest currency unit (paise for INR)
+        // Assuming plan.price is in full units (e.g. 29.00)
+        const amount = Math.round(parseFloat(plan.price) * 100);
+        const currency = plan.currency || 'USD'; // Default to USD if not set, or INR
 
         const options = {
             amount: amount,
-            currency: currencyCode,
-            receipt: `rcpt_${session.company_id}_${Date.now()}`,
+            currency: currency,
+            receipt: `rcpt_${Date.now()}_${session.company_id}`,
             notes: {
-                companyId: session.company_id.toString(),
-                planId: plan.id.toString(),
-                description: `Subscription for ${plan.name} plan`
+                company_id: session.company_id,
+                plan_id: plan.id,
+                plan_name: plan.name
             }
         };
 
         const order = await razorpay.orders.create(options);
 
-        // Fetch public key for frontend
-        const keyRes = await client.query("SELECT public_key FROM payment_settings WHERE gateway_name = 'razorpay' AND is_enabled = true");
-        const publicKey = keyRes.rows[0]?.public_key;
-
+        // 4. Return Order Details
         return NextResponse.json({
+            key: razorpayKey,
             orderId: order.id,
             amount: order.amount,
             currency: order.currency,
-            key: publicKey,
+            name: plan.name,
+            description: `Subscription for ${plan.name}`
         });
 
-    } catch (error: any) {
-        console.error('Razorpay Order Error:', error);
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
-    } finally {
-        client.release();
+    } catch (error) {
+        console.error('Error creating Razorpay order:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

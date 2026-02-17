@@ -17,6 +17,32 @@ export async function POST(req: Request) {
                  RETURNING id`,
                 [name, phone, email, message, company_name, plan_interest]
             );
+            const { sendWhatsAppMessage } = await import('@/lib/whatsapp');
+
+            // 1. Notify Admin
+            const adminPhone = '919871881183'; // Updated with User provided number
+            if (adminPhone) {
+                await sendWhatsAppMessage(adminPhone, 'new_lead_alert', [
+                    { type: 'text', text: name },
+                    { type: 'text', text: phone },
+                    { type: 'text', text: plan_interest || 'General' }
+                ]);
+            }
+
+            // 2. Thank User
+            if (phone) {
+                // Formatting phone number to ensure it has country code if missing
+                // This is a naive check. WhatsApp requires full number with country code.
+                // Assuming input might be local.
+                const userPhone = phone.replace(/[^0-9]/g, '');
+                // If length is 10, assume India (+91)
+                const formattedPhone = userPhone.length === 10 ? `91${userPhone}` : userPhone;
+
+                await sendWhatsAppMessage(formattedPhone, 'enquiry_received', [
+                    { type: 'text', text: name }
+                ]);
+            }
+
             return NextResponse.json({ success: true, id: res.rows[0].id });
         } finally {
             client.release();
