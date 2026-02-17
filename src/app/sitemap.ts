@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { getLatestBlogs } from '@/lib/db';
+import { KEYWORD_CONFIG } from '@/lib/seo-config';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +17,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
     }));
 
+    // Get all keyword landing pages
+    const keywordUrls = Object.keys(KEYWORD_CONFIG).map((slug) => ({
+        url: `${baseUrl}/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.9,
+    }));
+
     return [
         {
             url: baseUrl,
@@ -23,6 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: 'daily',
             priority: 1,
         },
+        ...keywordUrls,
         {
             url: `${baseUrl}/blog`,
             lastModified: new Date(),
@@ -54,5 +64,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.5,
         },
         ...blogUrls,
+        ...keywordUrls,
     ];
 }
