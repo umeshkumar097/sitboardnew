@@ -433,6 +433,48 @@ export default function LandingPageTemplate({
                 </div>
             </section>
 
+
+            {/* Free Tools Section */}
+            <section style={{ padding: '6rem 0', background: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
+                <div className="container">
+                    <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                        <div style={{ display: 'inline-block', padding: '4px 12px', background: '#dbeafe', color: '#1e40af', borderRadius: '100px', fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem' }}>
+                            FREE UTILITIES
+                        </div>
+                        <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>Tools for Real Estate Success</h2>
+                        <p style={{ fontSize: '1.25rem', maxWidth: '700px', margin: '0 auto', color: 'var(--text-muted)' }}>
+                            Use our free calculators to plan your finances and commissions accurately.
+                        </p>
+                    </div>
+
+                    <div className="grid-2" style={{ gap: '2rem' }}>
+                        {/* EMI Calculator Card */}
+                        <div style={{ background: 'white', padding: '2.5rem', borderRadius: '1rem', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+                            <div style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>🧮</div>
+                            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Home Loan EMI Calculator</h3>
+                            <p style={{ color: '#64748b', marginBottom: '2rem', flex: 1 }}>
+                                Accurately calculate your monthly EMI, total interest, and pay-off amount. Plan your home purchase with confidence.
+                            </p>
+                            <Link href="/tools/emi-calculator" className="btn btn-secondary" style={{ width: '100%', textAlign: 'center' }}>
+                                Calculate EMI →
+                            </Link>
+                        </div>
+
+                        {/* Commission Calculator Card */}
+                        <div style={{ background: 'white', padding: '2.5rem', borderRadius: '1rem', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+                            <div style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>🤝</div>
+                            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Brokerage Commission Calculator</h3>
+                            <p style={{ color: '#64748b', marginBottom: '2rem', flex: 1 }}>
+                                Instantly calculate your net commission earnings after TDS deductions. Essential for agents and channel partners.
+                            </p>
+                            <Link href="/tools/commission-calculator" className="btn btn-secondary" style={{ width: '100%', textAlign: 'center' }}>
+                                Calculate Commission →
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Latest Blogs Section */}
             {blogs && blogs.length > 0 && (
                 <section style={{ padding: '6rem 0', background: 'white' }}>
