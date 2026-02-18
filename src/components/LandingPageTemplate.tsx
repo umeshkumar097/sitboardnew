@@ -447,7 +447,7 @@ export default function LandingPageTemplate({
                         </p>
                     </div>
 
-                    <div className="grid-2" style={{ gap: '2rem' }}>
+                    <div className="grid-3" style={{ gap: '2rem' }}>
                         {/* EMI Calculator Card */}
                         <div style={{ background: 'white', padding: '2.5rem', borderRadius: '1rem', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
                             <div style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>🧮</div>
@@ -469,6 +469,18 @@ export default function LandingPageTemplate({
                             </p>
                             <Link href="/tools/commission-calculator" className="btn btn-secondary" style={{ width: '100%', textAlign: 'center' }}>
                                 Calculate Commission →
+                            </Link>
+                        </div>
+
+                        {/* Stamp Duty Calculator Card */}
+                        <div style={{ background: 'white', padding: '2.5rem', borderRadius: '1rem', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+                            <div style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>🏛️</div>
+                            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Stamp Duty Calculator</h3>
+                            <p style={{ color: '#64748b', marginBottom: '2rem', flex: 1 }}>
+                                Calculate exact Stamp Duty and Registration charges for property registration in any Indian state.
+                            </p>
+                            <Link href="/tools/stamp-duty-calculator" className="btn btn-secondary" style={{ width: '100%', textAlign: 'center' }}>
+                                Check State Rates →
                             </Link>
                         </div>
                     </div>
