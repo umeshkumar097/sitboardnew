@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { getLatestBlogs } from '@/lib/db';
 import { KEYWORD_CONFIG } from '@/lib/seo-config';
+import { STAMP_DUTY_DATA } from '@/lib/stamp-duty-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +24,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: new Date(),
         changeFrequency: 'weekly' as const,
         priority: 0.9,
+    }));
+
+    // Get all stamp duty state pages
+    const stampDutyUrls = Object.keys(STAMP_DUTY_DATA).map((slug) => ({
+        url: `${baseUrl}/tools/stamp-duty-calculator/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.8,
     }));
 
     return [
@@ -75,6 +84,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: 'monthly',
             priority: 0.7,
         },
+        {
+            url: `${baseUrl}/tools/stamp-duty-calculator`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 0.8,
+        },
         ...blogUrls,
+        ...stampDutyUrls,
     ];
 }
