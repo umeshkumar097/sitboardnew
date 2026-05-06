@@ -48,9 +48,14 @@ export const KEYWORD_CONFIG: Record<string, SeoConfig> = {
         ],
         ctaText: 'Get Free CRM Demo',
         faqs: [
+            { question: 'What is the best CRM for real estate agents in India?', answer: 'SiteBoard is widely regarded as the best CRM for real estate agents in India. It provides a visual plot map, instant lead capture, WhatsApp integration, and real-time inventory updates — all built specifically for the Indian real estate market.' },
+            { question: 'Is there a free real estate CRM in India?', answer: 'SiteBoard offers a free early access plan for Indian builders and developers. You can manage one project with full CRM and plot management features at no cost during the pre-launch phase.' },
+            { question: 'How does a real estate CRM help avoid double booking?', answer: 'SiteBoard\'s CRM uses an instant locking mechanism. The moment an agent marks a plot as Booked, it is locked system-wide. No other agent can book it simultaneously. This makes double booking technically impossible.' },
+            { question: 'Can I track multiple real estate projects with a single CRM?', answer: 'Yes. SiteBoard supports unlimited projects under a single company account. You can manage plots across multiple locations, assign agents, and get a unified view of all your real estate inventory.' },
+            { question: 'Does SiteBoard integrate with WhatsApp for lead follow-up?', answer: 'Yes. SiteBoard sends automated WhatsApp messages to new leads the moment they register, ensuring instant follow-up. It also supports manual WhatsApp messaging directly from the lead profile.' },
             { question: 'Does this CRM integrate with Facebook Ads?', answer: 'Yes, SiteBoard integrates directly with Facebook Lead Ads, so new leads appear instantly in your dashboard.' },
             { question: 'Can I track my sales team\'s calls?', answer: 'Absolutely. You can log calls, schedule follow-ups, and see daily activity reports for every team member.' },
-            { question: 'Is it suitable for small builders?', answer: 'Yes! We have plans tailored for small developers with just one project, as well as large enterprise features.' }
+            { question: 'Is it suitable for small builders?', answer: 'Yes! We have plans tailored for small developers with just one project, as well as large enterprise features for builders with 10+ projects.' }
         ]
     },
     'real-estate-management-software': {
@@ -261,6 +266,38 @@ export const KEYWORD_CONFIG: Record<string, SeoConfig> = {
             { question: 'Do I need to install anything?', answer: 'No, SiteBoard is 100% cloud-based. You just need a web browser.' },
             { question: ' Does it work on Mac?', answer: 'It works on Mac, Windows, Android, iPhone, and tablets seamlessly.' },
             { question: 'Can I import my Excel data?', answer: 'Yes, we provide bulk import tools to migrate your existing data quickly.' }
+        ]
+    },
+    'plot-management-software': {
+        title: 'Plot Management Software India | Visual Layout Tracking | SiteBoard',
+        description: 'India\'s best plot management software for land developers. Track availability, bookings, and sales with a real-time visual map. Prevent double booking instantly.',
+        headline: <>
+            India's #1 <br />
+            Plot Management<br />
+            <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Software.</span>
+        </>,
+        subheadline: 'Stop managing your layout on paper, Excel, or WhatsApp groups. Get a real-time visual map of every plot — available, booked, or sold — accessible by your entire team.',
+        features: [
+            { title: 'Visual Plot Map', description: 'See every plot in your layout on a color-coded visual board. Green = Available, Yellow = Booked, Red = Sold. Update in seconds.', icon: '🗺️' },
+            { title: 'Double Booking Prevention', description: 'Once a plot is booked, it is locked system-wide. Impossible for two agents to book the same plot simultaneously.', icon: '🔒' },
+            { title: 'Instant Status Updates', description: 'Status changes reflect in real-time for all agents and managers. No more outdated Excel sheets or WhatsApp calls.', icon: '⚡' },
+            { title: 'Plot-Level Details', description: 'Store area, price, facing direction, corner plot status, and customer information for each individual plot.', icon: '📋' },
+            { title: 'Booking History', description: 'Full audit trail of every booking, cancellation, and sale. Know who did what and when.', icon: '📜' },
+            { title: 'Multi-Project Support', description: 'Manage multiple layouts and phases under one account. Switch between projects instantly.', icon: '🏢' }
+        ],
+        benefits: [
+            'Zero double bookings guaranteed',
+            'Real-time status for your entire team',
+            'Manage 500+ plots effortlessly',
+            'No more Excel confusion'
+        ],
+        ctaText: 'See Your Plot Map',
+        faqs: [
+            { question: 'What is plot management software?', answer: 'Plot management software is a digital tool that helps real estate developers and land developers track the availability, booking status, and sale of individual plots in a layout. SiteBoard provides a visual color-coded map that updates in real-time.' },
+            { question: 'How does plot management software prevent double booking?', answer: 'SiteBoard uses an instant locking system. The moment an agent books a plot, it is locked across all accounts. No two agents can book the same plot simultaneously, eliminating disputes and double bookings entirely.' },
+            { question: 'Can plot management software work for large layouts with 500+ plots?', answer: 'Yes. SiteBoard is designed for layouts of all sizes — from 20 plots to 1000+ plots. The visual map renders smoothly and updates in real-time regardless of size.' },
+            { question: 'Is this software for plotted development only?', answer: 'SiteBoard works for plotted layouts, villa projects, and apartment blocks. Any project with individual units that need status tracking can use SiteBoard.' },
+            { question: 'How is SiteBoard different from Excel for plot tracking?', answer: 'Excel requires manual updates, has no real-time sync, and cannot prevent two agents from editing simultaneously. SiteBoard is live, locked, and accessible from any device — making it far superior to Excel for plot management.' }
         ]
     }
 };

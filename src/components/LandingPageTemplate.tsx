@@ -187,9 +187,11 @@ export default function LandingPageTemplate({
             <section id="features" style={{ padding: '6rem 0', background: 'white' }}>
                 <div className="container">
                     <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                        <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>Comprehensive {source === 'home' ? 'Real Estate ERP' : 'Software'} Features</h2>
+                        <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>
+                            {source === 'home' ? 'Real Estate ERP Software Built for Indian Builders' : 'Comprehensive Software Features'}
+                        </h2>
                         <p style={{ fontSize: '1.25rem', maxWidth: '700px', margin: '0 auto', color: 'var(--text-muted)' }}>
-                            Everything you need to manage your {source === 'home' ? 'real estate business' : 'projects'} efficiently.
+                            Everything you need to manage your {source === 'home' ? 'real estate business — from plot booking software to CRM and beyond' : 'projects'} efficiently.
                         </p>
                     </div>
 
@@ -199,7 +201,7 @@ export default function LandingPageTemplate({
                             <div style={{ display: 'inline-block', padding: '4px 12px', background: '#eff6ff', color: '#2563eb', borderRadius: '100px', fontSize: '0.875rem', fontWeight: 700, marginBottom: '1rem' }}>
                                 MOST IMPORTANT FEATURE
                             </div>
-                            <h3 style={{ fontSize: '2rem', marginBottom: '1.5rem' }}>Visual Plot Map</h3>
+                            <h3 style={{ fontSize: '2rem', marginBottom: '1.5rem' }}>Visual Plot Map — India's Best Plot Booking Software</h3>
                             <p style={{ fontSize: '1.125rem', marginBottom: '2rem', color: 'var(--text-muted)' }}>
                                 Stop guessing. See your entire project in a clear grid format. Anyone can instantly see plot status without asking or calling.
                             </p>
@@ -311,7 +313,7 @@ export default function LandingPageTemplate({
             <section style={{ padding: '6rem 0', background: '#f0f9ff' }}>
                 <div className="container">
                     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                        <h2 style={{ fontSize: '2.5rem', marginBottom: '3rem', textAlign: 'center' }}>Why Business Owners Switch to SiteBoard</h2>
+                        <h2 style={{ fontSize: '2.5rem', marginBottom: '3rem', textAlign: 'center' }}>Why Indian Builders Switch to This Builder CRM Software</h2>
 
                         <div className="grid-2" style={{ gap: '1.5rem' }}>
                             {[
@@ -342,8 +344,8 @@ export default function LandingPageTemplate({
             <section className="section-dark">
                 <div className="container">
                     <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto 4rem' }}>
-                        <h2>Built for Indian Real Estate</h2>
-                        <p style={{ fontSize: '1.125rem', opacity: 0.8 }}>Whether you are a builder with 5 towering projects or a land developer with 200 plots, SiteBoard adapts to your scale.</p>
+                        <h2>Real Estate Inventory Management Software for Every Scale</h2>
+                        <p style={{ fontSize: '1.125rem', opacity: 0.8 }}>Whether you are a builder with 5 towering projects or a land developer with 200 plots — our plotted development software adapts to your scale.</p>
                     </div>
 
                     <div className="grid-2">
@@ -358,6 +360,21 @@ export default function LandingPageTemplate({
                     </div>
                 </div>
             </section>
+
+            {/* SEO Keyword Section */}
+            {source === 'home' && (
+                <section style={{ padding: '4rem 0', background: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
+                    <div className="container" style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+                        <h2 style={{ fontSize: '2rem', marginBottom: '1.5rem', color: '#0f172a' }}>The Best Real Estate CRM Software in India — For Plots, Villas &amp; Apartments</h2>
+                        <p style={{ fontSize: '1.1rem', color: '#64748b', maxWidth: '750px', margin: '0 auto 1.5rem' }}>
+                            SiteBoard is purpose-built real estate CRM software for Indian developers. Unlike generic CRMs, we solve the unique challenges of plotted development: visual inventory, agent access control, and double-booking prevention. Our platform is used by builders managing 50 to 500+ plots across Greater Noida, Noida, Lucknow, and beyond.
+                        </p>
+                        <p style={{ fontSize: '1rem', color: '#64748b', maxWidth: '700px', margin: '0 auto' }}>
+                            Whether you need <strong>plot management software</strong>, a <strong>real estate ERP</strong> for Indian builders, or a <strong>channel partner management system</strong> — SiteBoard does it all from one dashboard.
+                        </p>
+                    </div>
+                </section>
+            )}
 
             {/* FAQ Section */}
             <section id="faq" style={{ padding: '6rem 0', background: 'white' }}>
